@@ -1,6 +1,6 @@
 import * as ts from "typescript"
 
-const file = "person.ts"
+const file = "person/person.ts"
 let program = ts.createProgram([file], { allowJs: true })
 const sourceFile = program.getSourceFile(file)
 const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
