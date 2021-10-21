@@ -9,5 +9,4 @@
 /.psa*
 /.spago
 parser.js
-person.js
 **.log
