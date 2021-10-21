@@ -1,4 +1,4 @@
-module PersonP where
+module Person where
 
 type Person = { name :: String, age :: Int }
 

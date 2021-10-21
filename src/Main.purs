@@ -11,7 +11,7 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Console (log)
 import Partial.Unsafe (unsafePartial)
-import PersonP (getAge)
+import Person (getAge)
 
 exampleModule :: Module Void
 exampleModule =
