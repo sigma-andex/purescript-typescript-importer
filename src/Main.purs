@@ -6,12 +6,20 @@ import Tidy.Codegen
 import Tidy.Codegen.Monad
 
 import Control.Monad.Writer (tell)
+import Data.Array (filter)
 import Data.Maybe (Maybe(..))
+import Data.String (contains)
+import Data.String.Pattern (Pattern(..))
 import Data.Tuple (Tuple(..))
+import Debug (spy)
 import Effect (Effect)
 import Effect.Console (log)
+import Node.Encoding (Encoding(..))
+import Node.FS.Sync as S
+import Node.Path as Path
 import Partial.Unsafe (unsafePartial)
 import Person (getAge)
+import Typescript.Parser (createProgram, createSourceFile, getSourceFile)
 
 exampleModule :: Module Void
 exampleModule =
@@ -60,6 +68,24 @@ personModule =
               )
           ]
 
+
+
+dirs :: Effect (Array String)
+dirs = S.readdir "person" <#> filter (contains (Pattern "ts"))
+
+tsCompilerExample :: String -> String -> Effect Unit 
+tsCompilerExample name sourceFile = do 
+  sf <- createSourceFile name sourceFile 
+  let 
+    _ = spy "sourcefile" sf 
+  pure unit
+
+
 main :: Effect Unit
 main = do
   log $ show (getAge { name : "Franz", age : 1242})
+  log "-----"
+  files <- dirs
+  program <- createProgram $ spy "files" files
+  sourceFile <- getSourceFile program "person.ts"
+  log "loaded"
