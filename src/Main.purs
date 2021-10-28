@@ -94,6 +94,6 @@ main = do
     log
       $ case isTypeAliasDeclaration n of
           Just tln -> 
-              "Got a type alias declaration"
+              "Got a type alias declaration: " <> tln.name.text
           Nothing -> "Not a type alias declaration!"
   log "loaded"
