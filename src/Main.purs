@@ -91,9 +91,12 @@ main = do
     -- let 
     --   _ = spy "node" n 
     -- log ""
-    log
-      $ case isTypeAliasDeclaration n of
+    case isTypeAliasDeclaration n of
           Just tln -> 
-              "Got a type alias declaration: " <> tln.name.text
-          Nothing -> "Not a type alias declaration!"
+            do
+              log $ "Got a type alias declaration: " <> tln.name.text  
+              let 
+                _ = spy "Type" tln."type"
+              pure unit 
+          Nothing -> log "Not a type alias declaration!"
   log "loaded"

@@ -4,7 +4,6 @@ import Prelude
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toMaybe)
 import Effect (Effect)
-import Record.Builder (merge)
 import Type.Row (type (+))
 
 foreign import data SourceFile :: Type
@@ -25,16 +24,19 @@ foreign import getSourceFileChildren :: forall r. SourceFile -> Array (Record ( 
 
 foreign import getChildren :: forall r. Record ( | BaseNode r ) -> Array (Record ( | BaseNode r ))
 
-foreign import isTypeAliasDeclarationImpl :: forall r. Record ( | BaseNode + r ) -> Nullable (Record ( | TypeAliasDeclaration + r ))
+foreign import isTypeAliasDeclarationImpl :: forall typeNode r. Record ( | BaseNode + r ) -> Nullable (Record ( | TypeAliasDeclaration typeNode + r ))
 
-isTypeAliasDeclaration :: forall r. Record ( | BaseNode + r ) -> Maybe (Record ( | TypeAliasDeclaration + r ))
+isTypeAliasDeclaration :: forall typeNode r. Record ( | BaseNode + r ) -> Maybe (Record ( | TypeAliasDeclaration typeNode + r ))
 isTypeAliasDeclaration = isTypeAliasDeclarationImpl >>> toMaybe
 
-type Identifier r = ( text :: String | r )
+type Identifier r
+  = ( text :: String | r )
 
-type BaseSymbol = {}
+type BaseSymbol
+  = {}
 
-type TransientIdentifier r = ( resolvedSymbol :: BaseSymbol | Identifier + r )
+type TransientIdentifier r
+  = ( resolvedSymbol :: BaseSymbol | Identifier + r )
 
 type BaseNode r
   = ( | r )
@@ -55,7 +57,8 @@ type BaseDeclarationStatement name r
 type BaseTypeAliasDeclaration name r
   = ( | BaseDeclarationStatement name r )
 
-type TypeAliasDeclaration r = ( | BaseTypeAliasDeclaration { | Identifier ()} r )
+type TypeAliasDeclaration typeNode r
+  = ( "type" :: { | BaseTypeNode typeNode } | BaseTypeAliasDeclaration { | Identifier () } r )
 
 type BaseTypeLiteralNode members r
   = ( members :: Array (BaseTypeElement members) | BaseTypeNode + BaseDeclaration + r )
