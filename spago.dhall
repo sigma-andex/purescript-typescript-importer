@@ -12,11 +12,12 @@
   , "partial"
   , "prelude"
   , "psci-support"
+  , "record"
   , "strings"
   , "tidy-codegen"
   , "transformers"
   , "tuples"
   ]
 , packages = ./packages.dhall
-, sources = [ "src/**/*.purs", "test/**/*.purs" ]
+, sources = [ "src/**/*.purs", "test/**/*.purs", "generated-src/**/*.purs" ]
 }

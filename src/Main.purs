@@ -83,8 +83,10 @@ tsCompilerExample name sourceFile = do
 
 main :: Effect Unit
 main = do
+  log "----- Purescript code gen"
+  log $ printModule personModule
   log $ show (getAge { name : "Franz", age : 1242})
-  log "-----"
+  log "----- Typescript file loading"
   files <- dirs
   program <- createProgram $ spy "files" files
   sourceFile <- getSourceFile program "person.ts"

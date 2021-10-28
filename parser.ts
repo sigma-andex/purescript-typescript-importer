@@ -5,6 +5,7 @@ let program = ts.createProgram([file], { allowJs: true })
 const sourceFile = program.getSourceFile(file)
 const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
+
 ts.forEachChild(sourceFile!, node => {
     // if (ts.isFunctionDeclaration(node)) {
     //     console.log(`Got a function: ${node}`)
