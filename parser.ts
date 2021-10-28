@@ -16,7 +16,6 @@ ts.forEachChild(sourceFile!, node => {
     // } else {
         //console.log(`Got unknown: ${printer.printNode(ts.EmitHint.Unspecified,node,sourceFile!)}`, node)
     //}
-
     switch (node.kind) {
       case ts.SyntaxKind.TypeAliasDeclaration:
        const foo = node as ts.TypeAliasDeclaration

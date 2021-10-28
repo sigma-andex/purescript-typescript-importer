@@ -1,12 +1,10 @@
 module Main where
 
 import Prelude
-import PureScript.CST.Types
-import Tidy.Codegen
-import Tidy.Codegen.Monad
 
 import Control.Monad.Writer (tell)
 import Data.Array (filter)
+import Data.Foldable (for_)
 import Data.Maybe (Maybe(..))
 import Data.String (contains)
 import Data.String.Pattern (Pattern(..))
@@ -14,12 +12,13 @@ import Data.Tuple (Tuple(..))
 import Debug (spy)
 import Effect (Effect)
 import Effect.Console (log)
-import Node.Encoding (Encoding(..))
 import Node.FS.Sync as S
-import Node.Path as Path
 import Partial.Unsafe (unsafePartial)
 import Person (getAge)
-import Typescript.Parser (createProgram, createSourceFile, getSourceFile)
+import PureScript.CST.Types (Module)
+import Tidy.Codegen (binderCtor, binderVar, caseBranch, dataCtor, declData, declForeign, declSignature, declType, declValue, exprApp, exprCase, exprIdent, exprSection, printModule, typeApp, typeArrow, typeCtor, typeForall, typeRecord, typeVar)
+import Tidy.Codegen.Monad (codegenModule, importOpen)
+import Typescript.Parser (createProgram, createSourceFile, getChildren, getSourceFile, getSourceFileChildren, isTypeAliasDeclaration)
 
 exampleModule :: Module Void
 exampleModule =
@@ -68,26 +67,33 @@ personModule =
               )
           ]
 
-
-
 dirs :: Effect (Array String)
-dirs = S.readdir "person" <#> filter (contains (Pattern "ts"))
+dirs = S.readdir "person" <#> filter (contains (Pattern "ts")) <#> map (\n -> "person/" <> n)
 
-tsCompilerExample :: String -> String -> Effect Unit 
-tsCompilerExample name sourceFile = do 
-  sf <- createSourceFile name sourceFile 
-  let 
-    _ = spy "sourcefile" sf 
+tsCompilerExample :: String -> String -> Effect Unit
+tsCompilerExample name sourceFile = do
+  sf <- createSourceFile name sourceFile
+  let
+    _ = spy "sourcefile" sf
   pure unit
-
 
 main :: Effect Unit
 main = do
   log "----- Purescript code gen"
   log $ printModule personModule
-  log $ show (getAge { name : "Franz", age : 1242})
+  log $ show (getAge { name: "Franz", age: 1242 })
   log "----- Typescript file loading"
   files <- dirs
+  log $ show files
   program <- createProgram $ spy "files" files
-  sourceFile <- getSourceFile program "person.ts"
+  sourceFile <- getSourceFile program "person/person.ts"
+  for_ ((getSourceFileChildren >=> getChildren) sourceFile) \n -> do
+    -- let 
+    --   _ = spy "node" n 
+    -- log ""
+    log
+      $ case isTypeAliasDeclaration n of
+          Just tln -> 
+              "Got a type alias declaration"
+          Nothing -> "Not a type alias declaration!"
   log "loaded"
