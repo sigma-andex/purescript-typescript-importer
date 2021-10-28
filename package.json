@@ -8,7 +8,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT-0",
   "devDependencies": {
     "@rowtype-yoga/prettier-plugin-purescript": "^1.11.2",
     "@types/node": "^16.11.0",
