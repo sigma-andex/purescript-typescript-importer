@@ -1,4 +1,4 @@
-{ name = "purescript-typescript-importer"
+{ name = "typescript-importer"
 , dependencies =
   [ "arrays"
   , "console"
