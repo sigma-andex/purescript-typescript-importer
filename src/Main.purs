@@ -9,7 +9,6 @@ import Data.String (contains)
 import Data.String.Pattern (Pattern(..))
 import Data.Tuple (Tuple(..))
 import Data.Unfoldable as Unfoldable
-import Debug (spy)
 import Effect (Effect)
 import Effect.Console (log)
 import Node.FS.Sync as S
@@ -28,21 +27,19 @@ dirs = S.readdir "person" <#> filter (contains (Pattern "ts")) <#> map (\n -> "p
 constJust :: forall t20 t25. t20 -> t25 -> Maybe t20
 constJust = Just >>> const
 
-parseLiteral :: forall e. Partial => SyntaxKindEnum -> Maybe (CST.Type e)
-parseLiteral = match (Proxy :: Proxy SyntaxKindEnum) (Nothing :: Maybe (CST.Type e)) (constJust $ typeCtor "String") (constJust $ typeCtor "String")
-
 parseType :: ∀ e. Partial => Record (BaseNode + ()) -> Maybe (CST.Type e)
 parseType n = case isTypeLiteralNode n of
   Just tln ->
     let
       parseMember :: Record (BaseNode + ()) -> Maybe (Tuple String (CST.Type e))
-      parseMember n = case isPropertySignature n of
+      parseMember memberNode = case isPropertySignature memberNode of
         Just ps ->
           let
             name = ps.name.text
 
-            -- parseLiteral :: SyntaxKindEnum -> Maybe (CST.Type e)
-            -- parseLiteral = match (Proxy :: Proxy SyntaxKindEnum) Nothing (Just $ typeCtor "String") (Just $ typeCtor "String")
+            parseLiteral :: SyntaxKindEnum -> Maybe (CST.Type e)
+            parseLiteral = match (Proxy :: Proxy SyntaxKindEnum) (Nothing :: Maybe (CST.Type e)) (constJust $ typeCtor "String") (constJust $ typeCtor "String")
+
             tpe = ps."type" # toMaybe >>= (_.kind >>> parseLiteral)
           in
             case tpe of
@@ -69,7 +66,7 @@ main = do
   log "---Typescript file loading---"
   files <- dirs
   log $ show files
-  program <- createProgram $ spy "files" files
+  program <- createProgram files
   sourceFile <- getSourceFile program "person/person.ts"
   log "---Purescript codegen---"
   let
