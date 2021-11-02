@@ -38,7 +38,7 @@ parseType n = case isTypeLiteralNode n of
             name = ps.name.text
 
             parseLiteral :: SyntaxKindEnum -> Maybe (CST.Type e)
-            parseLiteral = match (Proxy :: Proxy SyntaxKindEnum) (Nothing :: Maybe (CST.Type e)) (constJust $ typeCtor "String") (constJust $ typeCtor "String")
+            parseLiteral = match (Proxy :: Proxy SyntaxKindEnum) (Nothing :: Maybe (CST.Type e)) (constJust $ typeCtor "Number") (constJust $ typeCtor "String")
 
             tpe = ps."type" # toMaybe >>= (_.kind >>> parseLiteral)
           in
