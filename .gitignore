@@ -8,5 +8,4 @@
 /.purs*
 /.psa*
 /.spago
-parser.js
 **.log
