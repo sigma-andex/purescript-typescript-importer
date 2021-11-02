@@ -1,7 +1,6 @@
 module Typescript.Parser where
 
 import Prelude
-
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toMaybe)
 import Effect (Effect)
@@ -35,12 +34,12 @@ isTypeAliasDeclaration = isTypeAliasDeclarationImpl >>> toMaybe
 
 foreign import isTypeLiteralNodeImpl :: forall r. Record ( | BaseNode + r ) -> Nullable (Record TypeLiteralNode)
 
-isTypeLiteralNode :: forall r. Record ( | BaseNode + r) -> Maybe (Record TypeLiteralNode)
+isTypeLiteralNode :: forall r. Record ( | BaseNode + r ) -> Maybe (Record TypeLiteralNode)
 isTypeLiteralNode = isTypeLiteralNodeImpl >>> toMaybe
 
 foreign import isPropertySignatureImpl :: forall typeNode r. Record ( | BaseTypeNode + r ) -> Nullable (Record ( | PropertySignature typeNode + r ))
 
-isPropertySignature :: forall typeNode r. Record ( | BaseTypeNode + r) -> Maybe (Record ( | PropertySignature typeNode + r))
+isPropertySignature :: forall typeNode r. Record ( | BaseTypeNode + r ) -> Maybe (Record ( | PropertySignature typeNode + r ))
 isPropertySignature = isPropertySignatureImpl >>> toMaybe
 
 type Identifier r
@@ -65,12 +64,13 @@ type BaseTypeElement r
   = ( | r )
 
 type TypeElement :: forall k. Row k
-type TypeElement = BaseTypeElement ()
+type TypeElement
+  = BaseTypeElement ()
 
 data SyntaxKindEnum
 
-foreign import data StringKeyword :: SyntaxKindEnum 
-foreign import data NumberKeyword :: SyntaxKindEnum 
+foreign import data StringKeyword :: SyntaxKindEnum
+foreign import data NumberKeyword :: SyntaxKindEnum
 
 data SyntaxKind :: SyntaxKindEnum -> Type
 data SyntaxKind k
@@ -82,21 +82,27 @@ instance Enum SyntaxKind NumberKeyword StringKeyword where
   enumValue = numberKeyword
 instance Enum SyntaxKind StringKeyword Unit where
   enumValue = stringKeyword
-  
+
 instance EnumConfig SyntaxKindEnum SyntaxKind NumberKeyword
 
 type BaseToken :: forall k. k -> Row Type -> Row Type
-type BaseToken kind r = BaseNode ( kind :: Proxy kind | r )
+type BaseToken kind r
+  = BaseNode ( kind :: Proxy kind | r )
 
 type Token :: Type -> Row Type -> Row Type
-type Token kind r = BaseToken kind r 
+type Token kind r
+  = BaseToken kind r
 
-type KeywordSyntaxKind = SyntaxKind StringKeyword |+| SyntaxKind NumberKeyword
-type KeywordToken r = BaseToken KeywordSyntaxKind r
+type KeywordSyntaxKind
+  = SyntaxKind StringKeyword |+| SyntaxKind NumberKeyword
+type KeywordToken r
+  = BaseToken KeywordSyntaxKind r
 
-type PropertyName = Identifier ()
+type PropertyName
+  = Identifier ()
 
-type PropertySignature typeNode r = ( name :: { | PropertyName}, type:: Nullable { | BaseTypeNode typeNode } | r)
+type PropertySignature typeNode r
+  = ( name :: { | PropertyName }, type :: Nullable { | BaseTypeNode typeNode } | r )
 
 type BaseDeclaration :: forall k. Row k -> Row k
 type BaseDeclaration r
