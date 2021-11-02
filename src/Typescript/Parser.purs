@@ -2,15 +2,12 @@ module Typescript.Parser where
 
 import Prelude
 
-import Data.Eq as Eq
-import Data.Function.Uncurried (Fn2, runFn2)
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toMaybe)
-import Debug (spy)
 import Effect (Effect)
-import Type.Proxy (Proxy(..))
+import Type.Proxy (Proxy)
 import Type.Row (type (+))
-import Typescript.Utils.Enum (class Enum, class EnumConfig, class IsMatch)
+import Typescript.Utils.Enum (class Enum, class EnumConfig)
 import Untagged.Union (type (|+|))
 
 foreign import data SourceFile :: Type
@@ -55,15 +52,19 @@ type BaseSymbol
 type TransientIdentifier r
   = ( resolvedSymbol :: BaseSymbol | Identifier + r )
 
+type BaseNode :: forall k. k -> k
 type BaseNode r
   = ( | r )
 
+type BaseTypeNode :: forall k. Row k -> Row k
 type BaseTypeNode r
   = ( | BaseNode + r )
 
+type BaseTypeElement :: forall k. k -> k
 type BaseTypeElement r
   = ( | r )
 
+type TypeElement :: forall k. Row k
 type TypeElement = BaseTypeElement ()
 
 data SyntaxKindEnum
@@ -97,15 +98,19 @@ type PropertyName = Identifier ()
 
 type PropertySignature typeNode r = ( name :: { | PropertyName}, type:: Nullable { | BaseTypeNode typeNode } | r)
 
+type BaseDeclaration :: forall k. Row k -> Row k
 type BaseDeclaration r
   = ( | BaseNode + r )
 
+type BaseNamedDeclaration :: forall k. k -> Row k -> Row k
 type BaseNamedDeclaration name r
   = ( name :: name | BaseDeclaration + r )
 
+type BaseDeclarationStatement :: forall k. k -> Row k -> Row k
 type BaseDeclarationStatement name r
   = ( | BaseNamedDeclaration name r )
 
+type BaseTypeAliasDeclaration :: forall k. k -> Row k -> Row k
 type BaseTypeAliasDeclaration name r
   = ( | BaseDeclarationStatement name r )
 
