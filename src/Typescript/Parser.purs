@@ -1,10 +1,17 @@
 module Typescript.Parser where
 
 import Prelude
+
+import Data.Eq as Eq
+import Data.Function.Uncurried (Fn2, runFn2)
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toMaybe)
+import Debug (spy)
 import Effect (Effect)
+import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
+import Typescript.Utils.Enum (class Enum, class EnumConfig, class IsMatch)
+import Untagged.Union (type (|+|))
 
 foreign import data SourceFile :: Type
 
@@ -29,6 +36,16 @@ foreign import isTypeAliasDeclarationImpl :: forall typeNode r. Record ( | BaseN
 isTypeAliasDeclaration :: forall typeNode r. Record ( | BaseNode + r ) -> Maybe (Record ( | TypeAliasDeclaration typeNode + r ))
 isTypeAliasDeclaration = isTypeAliasDeclarationImpl >>> toMaybe
 
+foreign import isTypeLiteralNodeImpl :: forall r. Record ( | BaseNode + r ) -> Nullable (Record TypeLiteralNode)
+
+isTypeLiteralNode :: forall r. Record ( | BaseNode + r) -> Maybe (Record TypeLiteralNode)
+isTypeLiteralNode = isTypeLiteralNodeImpl >>> toMaybe
+
+foreign import isPropertySignatureImpl :: forall typeNode r. Record ( | BaseTypeNode + r ) -> Nullable (Record ( | PropertySignature typeNode + r ))
+
+isPropertySignature :: forall typeNode r. Record ( | BaseTypeNode + r) -> Maybe (Record ( | PropertySignature typeNode + r))
+isPropertySignature = isPropertySignatureImpl >>> toMaybe
+
 type Identifier r
   = ( text :: String | r )
 
@@ -47,10 +64,45 @@ type BaseTypeNode r
 type BaseTypeElement r
   = ( | r )
 
+type TypeElement = BaseTypeElement ()
+
+data SyntaxKindEnum
+
+foreign import data StringKeyword :: SyntaxKindEnum 
+foreign import data NumberKeyword :: SyntaxKindEnum 
+
+data SyntaxKind :: SyntaxKindEnum -> Type
+data SyntaxKind k
+
+foreign import numberKeyword :: SyntaxKind NumberKeyword
+foreign import stringKeyword :: SyntaxKind StringKeyword
+
+instance Enum SyntaxKind NumberKeyword StringKeyword where
+  enumValue = numberKeyword
+instance Enum SyntaxKind StringKeyword Unit where
+  enumValue = stringKeyword
+  
+instance EnumConfig SyntaxKindEnum SyntaxKind NumberKeyword
+
+type BaseToken :: forall k. k -> Row Type -> Row Type
+type BaseToken kind r = BaseNode ( kind :: Proxy kind | r )
+
+type Token :: Type -> Row Type -> Row Type
+type Token kind r = BaseToken kind r 
+
+type KeywordSyntaxKind = SyntaxKind StringKeyword |+| SyntaxKind NumberKeyword
+type KeywordToken r = BaseToken KeywordSyntaxKind r
+
+type PropertyName = Identifier ()
+
+type PropertySignature typeNode r = ( name :: { | PropertyName}, type:: Nullable { | BaseTypeNode typeNode } | r)
+
 type BaseDeclaration r
   = ( | BaseNode + r )
+
 type BaseNamedDeclaration name r
   = ( name :: name | BaseDeclaration + r )
+
 type BaseDeclarationStatement name r
   = ( | BaseNamedDeclaration name r )
 
@@ -60,8 +112,8 @@ type BaseTypeAliasDeclaration name r
 type TypeAliasDeclaration typeNode r
   = ( "type" :: { | BaseTypeNode typeNode } | BaseTypeAliasDeclaration { | Identifier () } r )
 
-type BaseTypeLiteralNode members r
-  = ( members :: Array (BaseTypeElement members) | BaseTypeNode + BaseDeclaration + r )
+type TypeLiteralNode
+  = ( members :: Array (Record TypeElement) | BaseTypeNode + BaseDeclaration + () )
 
 type BaseSignatureDeclarationBase tpe r
   = ( "type" :: Record (BaseTypeNode tpe) | r )

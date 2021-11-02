@@ -5,6 +5,7 @@
   , "debug"
   , "effect"
   , "foldable-traversable"
+  , "functions"
   , "language-cst-parser"
   , "maybe"
   , "node-buffer"
@@ -20,9 +21,13 @@
   , "transformers"
   , "tuples"
   , "typelevel-prelude"
+  , "typescript-utils"
+  , "unfoldable"
+  , "untagged-union"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs", "generated-src/**/*.purs" ]
 , license = "MIT-0"
-, repository = "https://github.com/sigma-andex/purescript-typescript-importer.git"
+, repository =
+    "https://github.com/sigma-andex/purescript-typescript-importer.git"
 }

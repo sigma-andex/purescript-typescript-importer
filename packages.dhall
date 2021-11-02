@@ -102,4 +102,5 @@ let upstream =
       , version =
           "v1.1.1"
       }
+    with typescript-utils = ../purescript-typescript-utils/spago.dhall as Location
 in  upstream

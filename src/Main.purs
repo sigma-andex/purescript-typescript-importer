@@ -1,102 +1,82 @@
 module Main where
 
 import Prelude
-
 import Control.Monad.Writer (tell)
 import Data.Array (filter)
-import Data.Foldable (for_)
 import Data.Maybe (Maybe(..))
+import Data.Nullable (toMaybe)
 import Data.String (contains)
 import Data.String.Pattern (Pattern(..))
 import Data.Tuple (Tuple(..))
+import Data.Unfoldable as Unfoldable
 import Debug (spy)
 import Effect (Effect)
 import Effect.Console (log)
 import Node.FS.Sync as S
 import Partial.Unsafe (unsafePartial)
-import Person (getAge)
-import PureScript.CST.Types (Module)
-import Tidy.Codegen (binderCtor, binderVar, caseBranch, dataCtor, declData, declForeign, declSignature, declType, declValue, exprApp, exprCase, exprIdent, exprSection, printModule, typeApp, typeArrow, typeCtor, typeForall, typeRecord, typeVar)
-import Tidy.Codegen.Monad (codegenModule, importOpen)
-import Typescript.Parser (createProgram, createSourceFile, getChildren, getSourceFile, getSourceFileChildren, isTypeAliasDeclaration)
-
-exampleModule :: Module Void
-exampleModule =
-  unsafePartial
-    $ codegenModule "Data.Maybe" do
-        importOpen "Prelude"
-        tell
-          [ declData "Maybe" [ typeVar "a" ]
-              [ dataCtor "Nothing" []
-              , dataCtor "Just" [ typeVar "a" ]
-              ]
-          , declSignature "maybe" do
-              typeForall [ typeVar "a", typeVar "b" ] do
-                typeArrow
-                  [ typeVar "b"
-                  , typeArrow [ typeVar "a" ] (typeVar "b")
-                  , typeApp (typeCtor "Maybe") [ typeVar "a" ]
-                  ]
-                  (typeVar "b")
-          , declValue "maybe" [ binderVar "nothing", binderVar "just" ] do
-              exprCase [ exprSection ]
-                [ caseBranch [ binderCtor "Just" [ binderVar "a" ] ] do
-                    exprApp (exprIdent "just") [ exprIdent "a" ]
-                , caseBranch [ binderCtor "Nothing" [] ] do
-                    exprIdent "nothing"
-                ]
-          ]
-
-personModule :: Module Void
-personModule =
-  unsafePartial
-    $ codegenModule "Person" do
-        tell
-          [ declType "Person" []
-              ( typeRecord
-                  [ Tuple "name" (typeCtor "String")
-                  , Tuple "age" (typeCtor "Int")
-                  ]
-                  Nothing
-              )
-          , declForeign "getAge"
-              ( typeArrow
-                  [ typeCtor "Person" ]
-                  ( typeCtor "Number"
-                  )
-              )
-          ]
+import PureScript.CST.Types as CST
+import Tidy.Codegen (declType, printModule, typeCtor, typeRecord)
+import Tidy.Codegen.Monad (codegenModule)
+import Type.Proxy (Proxy(..))
+import Type.Row (type (+))
+import Typescript.Parser (BaseNode, SyntaxKindEnum, createProgram, getChildren, getSourceFile, getSourceFileChildren, isPropertySignature, isTypeAliasDeclaration, isTypeLiteralNode)
+import Typescript.Utils.Enum (match)
 
 dirs :: Effect (Array String)
 dirs = S.readdir "person" <#> filter (contains (Pattern "ts")) <#> map (\n -> "person/" <> n)
 
-tsCompilerExample :: String -> String -> Effect Unit
-tsCompilerExample name sourceFile = do
-  sf <- createSourceFile name sourceFile
-  let
-    _ = spy "sourcefile" sf
-  pure unit
+constJust :: forall t20 t25. t20 -> t25 -> Maybe t20
+constJust = Just >>> const
+
+parseLiteral :: forall e. Partial => SyntaxKindEnum -> Maybe (CST.Type e)
+parseLiteral = match (Proxy :: Proxy SyntaxKindEnum) (Nothing :: Maybe (CST.Type e)) (constJust $ typeCtor "String") (constJust $ typeCtor "String")
+
+parseType :: ∀ e. Partial => Record (BaseNode + ()) -> Maybe (CST.Type e)
+parseType n = case isTypeLiteralNode n of
+  Just tln ->
+    let
+      parseMember :: Record (BaseNode + ()) -> Maybe (Tuple String (CST.Type e))
+      parseMember n = case isPropertySignature n of
+        Just ps ->
+          let
+            name = ps.name.text
+
+            -- parseLiteral :: SyntaxKindEnum -> Maybe (CST.Type e)
+            -- parseLiteral = match (Proxy :: Proxy SyntaxKindEnum) Nothing (Just $ typeCtor "String") (Just $ typeCtor "String")
+            tpe = ps."type" # toMaybe >>= (_.kind >>> parseLiteral)
+          in
+            case tpe of
+              Just tl -> Just $ Tuple name tl
+              Nothing -> Nothing
+        Nothing -> Nothing
+
+      members :: Array (Tuple String (CST.Type e))
+      members = tln.members <#> parseMember >>= Unfoldable.fromMaybe
+    in
+      Just $ typeRecord members Nothing
+
+  Nothing -> Nothing
+
+parseDeclaration :: ∀ e. Partial => Record (BaseNode + ()) -> Maybe (CST.Declaration e)
+parseDeclaration n = case isTypeAliasDeclaration n of
+  Just tad -> case parseType tad."type" of
+    Just tpe -> Just $ declType tad.name.text [] tpe
+    Nothing -> Nothing
+  Nothing -> Nothing
 
 main :: Effect Unit
 main = do
-  log "----- Purescript code gen"
-  log $ printModule personModule
-  log $ show (getAge { name: "Franz", age: 1242 })
-  log "----- Typescript file loading"
+  log "---Typescript file loading---"
   files <- dirs
   log $ show files
   program <- createProgram $ spy "files" files
   sourceFile <- getSourceFile program "person/person.ts"
-  for_ ((getSourceFileChildren >=> getChildren) sourceFile) \n -> do
-    -- let 
-    --   _ = spy "node" n 
-    -- log ""
-    case isTypeAliasDeclaration n of
-          Just tln -> 
-            do
-              log $ "Got a type alias declaration: " <> tln.name.text  
-              let 
-                _ = spy "Type" tln."type"
-              pure unit 
-          Nothing -> log "Not a type alias declaration!"
-  log "loaded"
+  log "---Purescript codegen---"
+  let
+    generatedModule =
+      unsafePartial
+        $ codegenModule "Person" do
+            let
+              declarations = getSourceFileChildren sourceFile >>= getChildren <#> parseDeclaration >>= Unfoldable.fromMaybe
+            tell declarations
+  log $ printModule generatedModule
