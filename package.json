@@ -10,10 +10,9 @@
   "author": "",
   "license": "MIT-0",
   "devDependencies": {
-    "@rowtype-yoga/prettier-plugin-purescript": "^1.11.2",
     "@types/node": "^16.11.0",
-    "prettier": "^2.4.1",
     "purescript": "^0.14.4",
+    "purs-tidy": "^0.6.2",
     "spago": "^0.20.3",
     "ts-node": "^10.4.0",
     "typescript": "^4.4.4"
@@ -22,6 +21,7 @@
     "test": "test"
   },
   "dependencies": {
+    "acorn": "^8.5.0",
     "ajv": "^6.12.6",
     "ansi-escapes": "^3.2.0",
     "ansi-regex": "^4.1.0",
@@ -30,6 +30,7 @@
     "arch": "^2.2.0",
     "asn1": "^0.2.4",
     "assert-plus": "^1.0.0",
+    "astring": "^1.7.5",
     "asynckit": "^0.4.0",
     "aws-sign2": "^0.7.0",
     "aws4": "^1.11.0",

@@ -24,7 +24,7 @@ import Typescript.Utils.Enum (match)
 dirs :: Effect (Array String)
 dirs = S.readdir "person" <#> filter (contains (Pattern "ts")) <#> map (\n -> "person/" <> n)
 
-constJust :: forall t20 t25. t20 -> t25 -> Maybe t20
+constJust :: forall a b. a -> b -> Maybe a
 constJust = Just >>> const
 
 parseType :: ∀ e. Partial => Record (BaseNode + ()) -> Maybe (CST.Type e)
