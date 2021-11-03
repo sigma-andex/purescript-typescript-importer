@@ -6,7 +6,7 @@ const acorn = require('acorn')
 
 const options = { ecmaVersion: 6 }
 
-exports.parse =  (code) => acorn.parse(code, options)
+exports.parse = (code) => acorn.parse(code, options)
 
 exports.mkProgram = (body) => {
     return {

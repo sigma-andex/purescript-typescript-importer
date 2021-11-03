@@ -23,45 +23,45 @@ foreign import getSourceFiles :: Program -> Effect (Array SourceFile)
 
 foreign import getSourceFileName :: SourceFile -> String
 
-foreign import getSourceFileChildren :: forall r. SourceFile -> Array (Record ( | BaseNode r ))
+foreign import getSourceFileChildren :: forall r. SourceFile -> Array (Record (| BaseNode r))
 
-foreign import getChildren :: forall r. Record ( | BaseNode r ) -> Array (Record ( | BaseNode r ))
+foreign import getChildren :: forall r. Record (| BaseNode r) -> Array (Record (| BaseNode r))
 
-foreign import isTypeAliasDeclarationImpl :: forall typeNode r. Record ( | BaseNode + r ) -> Nullable (Record ( | TypeAliasDeclaration typeNode + r ))
+foreign import isTypeAliasDeclarationImpl :: forall typeNode r. Record (| BaseNode + r) -> Nullable (Record (| TypeAliasDeclaration typeNode + r))
 
-isTypeAliasDeclaration :: forall typeNode r. Record ( | BaseNode + r ) -> Maybe (Record ( | TypeAliasDeclaration typeNode + r ))
+isTypeAliasDeclaration :: forall typeNode r. Record (| BaseNode + r) -> Maybe (Record (| TypeAliasDeclaration typeNode + r))
 isTypeAliasDeclaration = isTypeAliasDeclarationImpl >>> toMaybe
 
-foreign import isTypeLiteralNodeImpl :: forall r. Record ( | BaseNode + r ) -> Nullable (Record TypeLiteralNode)
+foreign import isTypeLiteralNodeImpl :: forall r. Record (| BaseNode + r) -> Nullable (Record TypeLiteralNode)
 
-isTypeLiteralNode :: forall r. Record ( | BaseNode + r ) -> Maybe (Record TypeLiteralNode)
+isTypeLiteralNode :: forall r. Record (| BaseNode + r) -> Maybe (Record TypeLiteralNode)
 isTypeLiteralNode = isTypeLiteralNodeImpl >>> toMaybe
 
-foreign import isPropertySignatureImpl :: forall typeNode r. Record ( | BaseTypeNode + r ) -> Nullable (Record ( | PropertySignature typeNode + r ))
+foreign import isPropertySignatureImpl :: forall typeNode r. Record (| BaseTypeNode + r) -> Nullable (Record (| PropertySignature typeNode + r))
 
-isPropertySignature :: forall typeNode r. Record ( | BaseTypeNode + r ) -> Maybe (Record ( | PropertySignature typeNode + r ))
+isPropertySignature :: forall typeNode r. Record (| BaseTypeNode + r) -> Maybe (Record (| PropertySignature typeNode + r))
 isPropertySignature = isPropertySignatureImpl >>> toMaybe
 
 type Identifier r
-  = ( text :: String | r )
+  = (text :: String | r)
 
 type BaseSymbol
   = {}
 
 type TransientIdentifier r
-  = ( resolvedSymbol :: BaseSymbol | Identifier + r )
+  = (resolvedSymbol :: BaseSymbol | Identifier + r)
 
 type BaseNode :: forall k. k -> k
 type BaseNode r
-  = ( | r )
+  = (| r)
 
 type BaseTypeNode :: forall k. Row k -> Row k
 type BaseTypeNode r
-  = ( | BaseNode + r )
+  = (| BaseNode + r)
 
 type BaseTypeElement :: forall k. k -> k
 type BaseTypeElement r
-  = ( | r )
+  = (| r)
 
 type TypeElement :: forall k. Row k
 type TypeElement
@@ -80,6 +80,7 @@ foreign import stringKeyword :: SyntaxKind StringKeyword
 
 instance Enum SyntaxKind NumberKeyword StringKeyword where
   enumValue = numberKeyword
+
 instance Enum SyntaxKind StringKeyword Unit where
   enumValue = stringKeyword
 
@@ -87,7 +88,7 @@ instance EnumConfig SyntaxKindEnum SyntaxKind NumberKeyword
 
 type BaseToken :: forall k. k -> Row Type -> Row Type
 type BaseToken kind r
-  = BaseNode ( kind :: Proxy kind | r )
+  = BaseNode (kind :: Proxy kind | r)
 
 type Token :: Type -> Row Type -> Row Type
 type Token kind r
@@ -95,6 +96,7 @@ type Token kind r
 
 type KeywordSyntaxKind
   = SyntaxKind StringKeyword |+| SyntaxKind NumberKeyword
+
 type KeywordToken r
   = BaseToken KeywordSyntaxKind r
 
@@ -102,35 +104,35 @@ type PropertyName
   = Identifier ()
 
 type PropertySignature typeNode r
-  = ( name :: { | PropertyName }, type :: Nullable { | BaseTypeNode typeNode } | r )
+  = (name :: { | PropertyName }, type :: Nullable { | BaseTypeNode typeNode } | r)
 
 type BaseDeclaration :: forall k. Row k -> Row k
 type BaseDeclaration r
-  = ( | BaseNode + r )
+  = (| BaseNode + r)
 
 type BaseNamedDeclaration :: forall k. k -> Row k -> Row k
 type BaseNamedDeclaration name r
-  = ( name :: name | BaseDeclaration + r )
+  = (name :: name | BaseDeclaration + r)
 
 type BaseDeclarationStatement :: forall k. k -> Row k -> Row k
 type BaseDeclarationStatement name r
-  = ( | BaseNamedDeclaration name r )
+  = (| BaseNamedDeclaration name r)
 
 type BaseTypeAliasDeclaration :: forall k. k -> Row k -> Row k
 type BaseTypeAliasDeclaration name r
-  = ( | BaseDeclarationStatement name r )
+  = (| BaseDeclarationStatement name r)
 
 type TypeAliasDeclaration typeNode r
-  = ( "type" :: { | BaseTypeNode typeNode } | BaseTypeAliasDeclaration { | Identifier () } r )
+  = ("type" :: { | BaseTypeNode typeNode } | BaseTypeAliasDeclaration { | Identifier () } r)
 
 type TypeLiteralNode
-  = ( members :: Array (Record TypeElement) | BaseTypeNode + BaseDeclaration + () )
+  = (members :: Array (Record TypeElement) | BaseTypeNode + BaseDeclaration + ())
 
 type BaseSignatureDeclarationBase tpe r
-  = ( "type" :: Record (BaseTypeNode tpe) | r )
+  = ("type" :: Record (BaseTypeNode tpe) | r)
 
 type BaseFunctionLikeDeclaration tpe r
-  = ( | BaseSignatureDeclarationBase tpe + r )
+  = (| BaseSignatureDeclarationBase tpe + r)
 
 type BaseFunctionDeclaration tpe r
-  = ( | BaseFunctionLikeDeclaration tpe + r )
+  = (| BaseFunctionLikeDeclaration tpe + r)
