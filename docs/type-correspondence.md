@@ -155,7 +155,7 @@ id = asOneOf "abc-123
 ```
 </td>
 <td>
-Union types are represented using [`untagged-union`](https://github.com/jvliwanag/purescript-untagged-union).
+Union types are represented using <a href="https://github.com/jvliwanag/purescript-untagged-union"><code>untagged-union</code></a>.
 </td>
 <td>Can we create the necessary typeclass machinery to support this?</td>
 </tr>
