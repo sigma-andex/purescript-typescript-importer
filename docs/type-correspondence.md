@@ -18,13 +18,17 @@ As described in [everyday types](https://www.typescriptlang.org/docs/handbook/2/
 ```typescript
 string 
 ```
+
 </td>
 <td>
 
 ```purescript
 Data.String
 ```
+
 </td>
+  <td></td>
+  <td></td>
 </tr>
 <tr>
 <td>Numbers</td>
@@ -33,13 +37,16 @@ Data.String
 ```typescript
 number 
 ```
+  
 </td>
 <td>
 
 ```purescript
 Data.Number
 ```
+
 </td>
+  <td></td><td></td>
 </tr>
 <tr>
 <td>Booleans</td>
@@ -55,6 +62,7 @@ boolean
 Data.Boolean
 ```
 </td>
+  <td></td><td></td>
 </tr>
 <tr>
 <td>Arrays</td>
@@ -70,6 +78,7 @@ Array<T>
 Data.Array T 
 ```
 </td>
+  <td></td><td></td>
 </tr>
 <tr>
 <td>Functions</td>
@@ -85,7 +94,8 @@ const add : (a: number, b: number) => number = (a: number, b: string) => a + b
 add :: Number -> Number -> Number
 ```
 </td>
-<td>A curried representation will be automatically generated.
+  <td>A curried representation will be automatically generated. </td>
+  <td></td>
 </tr>
 
 
@@ -107,7 +117,7 @@ pt :: Point
 pt = { x:5, y: "Bla"}
 ```
 </td>
-<td>
+<td></td><td></td>
 </tr>
 <tr>
 <td>Optional properties</td>
@@ -127,6 +137,7 @@ person = { first : "hans", last: Nothing}
 <td>
 Optional properties in Typescript are represented as `Maybe`s in Purescript. An automatic conversin between the `Nullable` type and `Maybe` is provided.
 </td>
+  <td></td>
 </tr>
 <tr>
 <td>Union types</td>
