@@ -11,7 +11,7 @@ import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import GenCode (genCode)
 import Node.FS.Aff (readFile, readdir)
-import Node.Path (FilePath, basename)
+import Node.Path (FilePath, basename, basenameWithoutExt)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions.Diff (Actual(..), GoldenFile(..), shouldBeGolden)
 import Test.Spec.File (fileAsString)
@@ -34,15 +34,12 @@ testGolden fileNames = do
 testOne ∷ FilePath → FilePath → Spec Unit
 testOne expected fullFileName =
   it fileName do
-    let psFileName = toPureScriptFileName fileName
     -- content ← liftEffect $ fileAsString $ original <> fileName
     actual <- liftEffect $  genCode (original <> fileName)
     Actual actual `shouldBeGolden` GoldenFile (expected <> psFileName)
   where
   fileName = basename fullFileName
-  toPureScriptFileName fn =
-    "Person.purs"
-    -- pascalCase fn # replace (Pattern "\\.ts") (Replacement "\\.purs")
+  psFileName = pascalCase (basenameWithoutExt fileName "ts") <> ".purs"
 
 golden ∷ FilePath
 golden = "testfiles/golden/"
