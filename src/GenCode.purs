@@ -66,7 +66,6 @@ parseDeclaration n = do
 genCode :: Array String -> Effect (Array String)
 genCode fileNames = do
   program <- createProgram fileNames
-  _ <- getSourceFiles program
   sourceFiles <- traverse (getSourceFile program) fileNames
   
   traverse generateOne (sourceFiles)
