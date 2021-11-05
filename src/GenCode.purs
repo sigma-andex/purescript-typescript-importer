@@ -1,14 +1,17 @@
 module GenCode where
 
 import Prelude
+
 import Control.Monad.Writer (tell)
-import Data.Array (filter)
+import Data.Array (filter, length, singleton)
 import Data.Maybe (Maybe(..))
 import Data.Nullable (toMaybe)
 import Data.String (contains)
 import Data.String.Pattern (Pattern(..))
+import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Data.Unfoldable as Unfoldable
+import Debug (spy)
 import Effect (Effect)
 import Effect.Console (log)
 import Node.FS.Sync as S
@@ -18,7 +21,7 @@ import Tidy.Codegen (declType, printModule, typeCtor, typeRecord)
 import Tidy.Codegen.Monad (codegenModule)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Typescript.Parser (BaseNode, SyntaxKindEnum, createProgram, getChildren, getSourceFile, getSourceFileChildren, isPropertySignature, isTypeAliasDeclaration, isTypeLiteralNode)
+import Typescript.Parser (BaseNode, SyntaxKindEnum, createProgram, getChildren, getSourceFile, getSourceFileChildren, getSourceFiles, isPropertySignature, isTypeAliasDeclaration, isTypeLiteralNode)
 import Typescript.Utils.Enum (match)
 
 dirs :: Effect (Array String)
@@ -56,19 +59,21 @@ parseType n = case isTypeLiteralNode n of
 
 parseDeclaration :: ∀ e. Partial => Record (BaseNode + ()) -> Maybe (CST.Declaration e)
 parseDeclaration n = do
-  tad <-  isTypeAliasDeclaration n
+  tad <- isTypeAliasDeclaration n
   tpe <- parseType tad."type"
   pure $ declType tad.name.text [] tpe
 
-genCode :: String -> Effect String
-genCode fileName = do
-  program <- createProgram [fileName]
-  sourceFile <- getSourceFile program fileName
-  let
-    generatedModule =
-      unsafePartial
-        $ codegenModule "Person" do -- [TODO] Get real pascal name
-            let
-              declarations = getSourceFileChildren sourceFile >>= getChildren <#> parseDeclaration >>= Unfoldable.fromMaybe
-            tell declarations
-  pure $ printModule generatedModule
+genCode :: Array String -> Effect (Array String)
+genCode fileNames = do
+  program <- createProgram fileNames
+  _ <- getSourceFiles program
+  sourceFiles <- traverse (getSourceFile program) fileNames
+  
+  traverse generateOne (sourceFiles)
+  where
+  generateOne sf = do
+    let
+      generatedModule = unsafePartial $ codegenModule "Person" do -- [TODO] Get real pascal name
+        let declarations = getSourceFileChildren sf >>= getChildren <#> parseDeclaration >>= Unfoldable.fromMaybe
+        tell declarations
+    pure $ printModule generatedModule

@@ -9,7 +9,7 @@ exports.createSourceFile = (fileName) => (sourceText) => () => ts.createSourceFi
 exports.getSourceFile = (program) => (fileName) => () =>
     program.getSourceFile(fileName)
 
-exports.getSourceFiles = (program) => program.getSourceFiles()
+exports.getSourceFiles = (program) => () => program.getSourceFiles()
 
 exports.getSourceFileName = (sourceFile) => sourceFile.getName()
 

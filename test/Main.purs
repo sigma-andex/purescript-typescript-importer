@@ -2,44 +2,44 @@ module Test.Main where
 
 import Prelude
 
+import Data.Array (zip)
 import Data.Foldable (for_)
-import Data.Maybe (Maybe(..))
-import Data.String (Pattern(..), Replacement(..), replace)
 import Data.String.Extra (pascalCase)
+import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import GenCode (genCode)
-import Node.FS.Aff (readFile, readdir)
+import Node.FS.Aff (readdir)
 import Node.Path (FilePath, basename, basenameWithoutExt)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions.Diff (Actual(..), GoldenFile(..), shouldBeGolden)
-import Test.Spec.File (fileAsString)
 import Test.Spec.Reporter.Spec (specReporter)
 import Test.Spec.Runner (runSpec)
 
 main ∷ Effect Unit
 main =
   launchAff_ do
-    fileNames ← readdir original
-    runSpec [ specReporter ] (testGolden fileNames)
+    folders ← readdir original
+    runSpec [ specReporter ] (testGolden folders)
     pure unit
 
 testGolden ∷ Array FilePath → Spec Unit
-testGolden fileNames = do
+testGolden dirs = do
   describe "Golden Tests" do
     describe "formats" do
-      for_ fileNames $ testOne golden
+      for_ dirs $ testDir golden
 
-testOne ∷ FilePath → FilePath → Spec Unit
-testOne expected fullFileName =
-  it fileName do
-    -- content ← liftEffect $ fileAsString $ original <> fileName
-    actual <- liftEffect $  genCode (original <> fileName)
-    Actual actual `shouldBeGolden` GoldenFile (expected <> psFileName)
+testDir ∷ FilePath → FilePath → Spec Unit
+testDir expected fullDirName =
+  it dirName do 
+    fullFileNames ← readdir (original <> fullDirName)
+    actuals <- liftEffect $ genCode (map (\f -> original <> fullDirName <> "/" <> f) fullFileNames)
+    for_ (zip fullFileNames actuals) \(Tuple fileName actual) -> do
+      let psFileName = pascalCase (basenameWithoutExt fileName "ts") <> ".purs"
+      Actual actual `shouldBeGolden` GoldenFile (expected <> dirName <> "/" <> psFileName)
   where
-  fileName = basename fullFileName
-  psFileName = pascalCase (basenameWithoutExt fileName "ts") <> ".purs"
+    dirName = basename fullDirName
 
 golden ∷ FilePath
 golden = "testfiles/golden/"
