@@ -15,7 +15,8 @@
     "purs-tidy": "^0.6.2",
     "spago": "^0.20.3",
     "ts-node": "^10.4.0",
-    "typescript": "^4.4.4"
+    "typescript": "^4.4.4",
+    "unidiff": "^1.0.2"
   },
   "directories": {
     "test": "test"
@@ -56,6 +57,7 @@
     "cyclist": "^1.0.1",
     "dashdash": "^1.14.1",
     "delayed-stream": "^1.0.0",
+    "diff2html": "^3.4.13",
     "duplexify": "^3.7.1",
     "ecc-jsbn": "^0.1.2",
     "emoji-regex": "^7.0.3",

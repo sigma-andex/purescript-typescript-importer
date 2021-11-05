@@ -1,0 +1,3 @@
+module Golden where
+
+type Person = { name :: String, age :: Number }
