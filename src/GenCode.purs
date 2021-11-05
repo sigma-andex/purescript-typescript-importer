@@ -3,29 +3,20 @@ module GenCode where
 import Prelude
 
 import Control.Monad.Writer (tell)
-import Data.Array (filter, length, singleton)
 import Data.Maybe (Maybe(..))
 import Data.Nullable (toMaybe)
-import Data.String (contains)
-import Data.String.Pattern (Pattern(..))
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Data.Unfoldable as Unfoldable
-import Debug (spy)
 import Effect (Effect)
-import Effect.Console (log)
-import Node.FS.Sync as S
 import Partial.Unsafe (unsafePartial)
 import PureScript.CST.Types as CST
 import Tidy.Codegen (declType, printModule, typeCtor, typeRecord)
 import Tidy.Codegen.Monad (codegenModule)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Typescript.Parser (BaseNode, SyntaxKindEnum, createProgram, getChildren, getSourceFile, getSourceFileChildren, getSourceFiles, isPropertySignature, isTypeAliasDeclaration, isTypeLiteralNode)
+import Typescript.Parser (BaseNode, SyntaxKindEnum, createProgram, getChildren, getSourceFile, getSourceFileChildren, isPropertySignature, isTypeAliasDeclaration, isTypeLiteralNode)
 import Typescript.Utils.Enum (match)
-
-dirs :: Effect (Array String)
-dirs = S.readdir "person" <#> filter (contains (Pattern "ts")) <#> map (\n -> "person/" <> n)
 
 constJust :: forall a b. a -> b -> Maybe a
 constJust = Just >>> const
@@ -67,7 +58,7 @@ genCode :: Array String -> Effect (Array String)
 genCode fileNames = do
   program <- createProgram fileNames
   sourceFiles <- traverse (getSourceFile program) fileNames
-  
+
   traverse generateOne (sourceFiles)
   where
   generateOne sf = do

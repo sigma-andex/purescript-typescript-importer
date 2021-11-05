@@ -32,14 +32,14 @@ testGolden dirs = do
 
 testDir ∷ FilePath → FilePath → Spec Unit
 testDir expected fullDirName =
-  it dirName do 
+  it dirName do
     fullFileNames ← readdir (original <> fullDirName)
     actuals <- liftEffect $ genCode (map (\f -> original <> fullDirName <> "/" <> f) fullFileNames)
     for_ (zip fullFileNames actuals) \(Tuple fileName actual) -> do
       let psFileName = pascalCase (basenameWithoutExt fileName "ts") <> ".purs"
       Actual actual `shouldBeGolden` GoldenFile (expected <> dirName <> "/" <> psFileName)
   where
-    dirName = basename fullDirName
+  dirName = basename fullDirName
 
 golden ∷ FilePath
 golden = "testfiles/golden/"
