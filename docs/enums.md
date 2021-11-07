@@ -78,11 +78,12 @@ nk =
 
 **Advantages**
 - Represents typescript enums pretty accurately and thus gives us the same type guarantees as the ts version.
-- Works well with union types
+- Works well with union types.
 
 **Disadvantages**
-- Feels a bit clumsy/boilerplatey compared to the lax approach
-- Some (background) machinery is necessary to make this work respectively user-friendly
+- Feels a bit clumsy/boilerplatey compared to the lax approach.
+- Some (background) machinery is necessary to make this work and user-friendly.
+- Exhaustive pattern matching is possible but needs some work-arounds.
 
 ## Lax approach
 
@@ -103,7 +104,8 @@ nk =
 
 **Advantages**
 - Feels more natural in ps.
+- Exhaustive pattern matching is easy.
 
 **Disadvantages**
 - Does *not* give the same type guarantees as ts enums, which is a bit shameful.
-- Does *not* work well with union types
+- Does *not* work well with union types.
