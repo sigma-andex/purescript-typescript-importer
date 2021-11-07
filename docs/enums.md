@@ -60,6 +60,8 @@ data Syntax :: SyntaxEnum -> Type
 data Syntax k
 
 -- as we declared `NumberSyntax` and `StringSyntax` foreign, we have no way to construct them, so let's define foreign imports for them.
+-- these will be defined in js as constants with their corresponding runtime representations in ts.
+-- in this case that would be 0 and 1 
 foreign import numberSyntax :: Syntax NumberSyntax
 foreign import stringSyntax :: Syntax StringSyntax
 
@@ -75,7 +77,7 @@ nk =
 ```
 
 **Advantages**
-- Represents typescript enums pretty accurate and thus gives us the same type guarantees as the ts version.
+- Represents typescript enums pretty accurately and thus gives us the same type guarantees as the ts version.
 - Works well with union types
 
 **Disadvantages**
