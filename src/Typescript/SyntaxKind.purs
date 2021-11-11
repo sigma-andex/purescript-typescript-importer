@@ -1,6 +1,7 @@
 module Typescript.SyntaxKind where
 
 import Typescript.Utils.Enum (class EnumRep)
+import Unsafe.Coerce (unsafeCoerce)
 
 data SyntaxKindEnum
 
@@ -773,1148 +774,1530 @@ foreign import lastJSDocNode :: SyntaxKind LastJSDocNode
 foreign import firstJSDocTagNode :: SyntaxKind FirstJSDocTagNode
 foreign import lastJSDocTagNode :: SyntaxKind LastJSDocTagNode
 
-instance EnumRep SyntaxKind Unknown where
+instance EnumRep SyntaxKind Unknown Int where
+  runtimeRep = unsafeCoerce unknown
   enumRep = unknown
 
-instance EnumRep SyntaxKind EndOfFileToken where
+instance EnumRep SyntaxKind EndOfFileToken Int where
+  runtimeRep = unsafeCoerce endOfFileToken
   enumRep = endOfFileToken
 
-instance EnumRep SyntaxKind SingleLineCommentTrivia where
+instance EnumRep SyntaxKind SingleLineCommentTrivia Int where
+  runtimeRep = unsafeCoerce singleLineCommentTrivia
   enumRep = singleLineCommentTrivia
 
-instance EnumRep SyntaxKind MultiLineCommentTrivia where
+instance EnumRep SyntaxKind MultiLineCommentTrivia Int where
+  runtimeRep = unsafeCoerce multiLineCommentTrivia
   enumRep = multiLineCommentTrivia
 
-instance EnumRep SyntaxKind NewLineTrivia where
+instance EnumRep SyntaxKind NewLineTrivia Int where
+  runtimeRep = unsafeCoerce newLineTrivia
   enumRep = newLineTrivia
 
-instance EnumRep SyntaxKind WhitespaceTrivia where
+instance EnumRep SyntaxKind WhitespaceTrivia Int where
+  runtimeRep = unsafeCoerce whitespaceTrivia
   enumRep = whitespaceTrivia
 
-instance EnumRep SyntaxKind ShebangTrivia where
+instance EnumRep SyntaxKind ShebangTrivia Int where
+  runtimeRep = unsafeCoerce shebangTrivia
   enumRep = shebangTrivia
 
-instance EnumRep SyntaxKind ConflictMarkerTrivia where
+instance EnumRep SyntaxKind ConflictMarkerTrivia Int where
+  runtimeRep = unsafeCoerce conflictMarkerTrivia
   enumRep = conflictMarkerTrivia
 
-instance EnumRep SyntaxKind NumericLiteral where
+instance EnumRep SyntaxKind NumericLiteral Int where
+  runtimeRep = unsafeCoerce numericLiteral
   enumRep = numericLiteral
 
-instance EnumRep SyntaxKind BigIntLiteral where
+instance EnumRep SyntaxKind BigIntLiteral Int where
+  runtimeRep = unsafeCoerce bigIntLiteral
   enumRep = bigIntLiteral
 
-instance EnumRep SyntaxKind StringLiteral where
+instance EnumRep SyntaxKind StringLiteral Int where
+  runtimeRep = unsafeCoerce stringLiteral
   enumRep = stringLiteral
 
-instance EnumRep SyntaxKind JsxText where
+instance EnumRep SyntaxKind JsxText Int where
+  runtimeRep = unsafeCoerce jsxText
   enumRep = jsxText
 
-instance EnumRep SyntaxKind JsxTextAllWhiteSpaces where
+instance EnumRep SyntaxKind JsxTextAllWhiteSpaces Int where
+  runtimeRep = unsafeCoerce jsxTextAllWhiteSpaces
   enumRep = jsxTextAllWhiteSpaces
 
-instance EnumRep SyntaxKind RegularExpressionLiteral where
+instance EnumRep SyntaxKind RegularExpressionLiteral Int where
+  runtimeRep = unsafeCoerce regularExpressionLiteral
   enumRep = regularExpressionLiteral
 
-instance EnumRep SyntaxKind NoSubstitutionTemplateLiteral where
+instance EnumRep SyntaxKind NoSubstitutionTemplateLiteral Int where
+  runtimeRep = unsafeCoerce noSubstitutionTemplateLiteral
   enumRep = noSubstitutionTemplateLiteral
 
-instance EnumRep SyntaxKind TemplateHead where
+instance EnumRep SyntaxKind TemplateHead Int where
+  runtimeRep = unsafeCoerce templateHead
   enumRep = templateHead
 
-instance EnumRep SyntaxKind TemplateMiddle where
+instance EnumRep SyntaxKind TemplateMiddle Int where
+  runtimeRep = unsafeCoerce templateMiddle
   enumRep = templateMiddle
 
-instance EnumRep SyntaxKind TemplateTail where
+instance EnumRep SyntaxKind TemplateTail Int where
+  runtimeRep = unsafeCoerce templateTail
   enumRep = templateTail
 
-instance EnumRep SyntaxKind OpenBraceToken where
+instance EnumRep SyntaxKind OpenBraceToken Int where
+  runtimeRep = unsafeCoerce openBraceToken
   enumRep = openBraceToken
 
-instance EnumRep SyntaxKind CloseBraceToken where
+instance EnumRep SyntaxKind CloseBraceToken Int where
+  runtimeRep = unsafeCoerce closeBraceToken
   enumRep = closeBraceToken
 
-instance EnumRep SyntaxKind OpenParenToken where
+instance EnumRep SyntaxKind OpenParenToken Int where
+  runtimeRep = unsafeCoerce openParenToken
   enumRep = openParenToken
 
-instance EnumRep SyntaxKind CloseParenToken where
+instance EnumRep SyntaxKind CloseParenToken Int where
+  runtimeRep = unsafeCoerce closeParenToken
   enumRep = closeParenToken
 
-instance EnumRep SyntaxKind OpenBracketToken where
+instance EnumRep SyntaxKind OpenBracketToken Int where
+  runtimeRep = unsafeCoerce openBracketToken
   enumRep = openBracketToken
 
-instance EnumRep SyntaxKind CloseBracketToken where
+instance EnumRep SyntaxKind CloseBracketToken Int where
+  runtimeRep = unsafeCoerce closeBracketToken
   enumRep = closeBracketToken
 
-instance EnumRep SyntaxKind DotToken where
+instance EnumRep SyntaxKind DotToken Int where
+  runtimeRep = unsafeCoerce dotToken
   enumRep = dotToken
 
-instance EnumRep SyntaxKind DotDotDotToken where
+instance EnumRep SyntaxKind DotDotDotToken Int where
+  runtimeRep = unsafeCoerce dotDotDotToken
   enumRep = dotDotDotToken
 
-instance EnumRep SyntaxKind SemicolonToken where
+instance EnumRep SyntaxKind SemicolonToken Int where
+  runtimeRep = unsafeCoerce semicolonToken
   enumRep = semicolonToken
 
-instance EnumRep SyntaxKind CommaToken where
+instance EnumRep SyntaxKind CommaToken Int where
+  runtimeRep = unsafeCoerce commaToken
   enumRep = commaToken
 
-instance EnumRep SyntaxKind QuestionDotToken where
+instance EnumRep SyntaxKind QuestionDotToken Int where
+  runtimeRep = unsafeCoerce questionDotToken
   enumRep = questionDotToken
 
-instance EnumRep SyntaxKind LessThanToken where
+instance EnumRep SyntaxKind LessThanToken Int where
+  runtimeRep = unsafeCoerce lessThanToken
   enumRep = lessThanToken
 
-instance EnumRep SyntaxKind LessThanSlashToken where
+instance EnumRep SyntaxKind LessThanSlashToken Int where
+  runtimeRep = unsafeCoerce lessThanSlashToken
   enumRep = lessThanSlashToken
 
-instance EnumRep SyntaxKind GreaterThanToken where
+instance EnumRep SyntaxKind GreaterThanToken Int where
+  runtimeRep = unsafeCoerce greaterThanToken
   enumRep = greaterThanToken
 
-instance EnumRep SyntaxKind LessThanEqualsToken where
+instance EnumRep SyntaxKind LessThanEqualsToken Int where
+  runtimeRep = unsafeCoerce lessThanEqualsToken
   enumRep = lessThanEqualsToken
 
-instance EnumRep SyntaxKind GreaterThanEqualsToken where
+instance EnumRep SyntaxKind GreaterThanEqualsToken Int where
+  runtimeRep = unsafeCoerce greaterThanEqualsToken
   enumRep = greaterThanEqualsToken
 
-instance EnumRep SyntaxKind EqualsEqualsToken where
+instance EnumRep SyntaxKind EqualsEqualsToken Int where
+  runtimeRep = unsafeCoerce equalsEqualsToken
   enumRep = equalsEqualsToken
 
-instance EnumRep SyntaxKind ExclamationEqualsToken where
+instance EnumRep SyntaxKind ExclamationEqualsToken Int where
+  runtimeRep = unsafeCoerce exclamationEqualsToken
   enumRep = exclamationEqualsToken
 
-instance EnumRep SyntaxKind EqualsEqualsEqualsToken where
+instance EnumRep SyntaxKind EqualsEqualsEqualsToken Int where
+  runtimeRep = unsafeCoerce equalsEqualsEqualsToken
   enumRep = equalsEqualsEqualsToken
 
-instance EnumRep SyntaxKind ExclamationEqualsEqualsToken where
+instance EnumRep SyntaxKind ExclamationEqualsEqualsToken Int where
+  runtimeRep = unsafeCoerce exclamationEqualsEqualsToken
   enumRep = exclamationEqualsEqualsToken
 
-instance EnumRep SyntaxKind EqualsGreaterThanToken where
+instance EnumRep SyntaxKind EqualsGreaterThanToken Int where
+  runtimeRep = unsafeCoerce equalsGreaterThanToken
   enumRep = equalsGreaterThanToken
 
-instance EnumRep SyntaxKind PlusToken where
+instance EnumRep SyntaxKind PlusToken Int where
+  runtimeRep = unsafeCoerce plusToken
   enumRep = plusToken
 
-instance EnumRep SyntaxKind MinusToken where
+instance EnumRep SyntaxKind MinusToken Int where
+  runtimeRep = unsafeCoerce minusToken
   enumRep = minusToken
 
-instance EnumRep SyntaxKind AsteriskToken where
+instance EnumRep SyntaxKind AsteriskToken Int where
+  runtimeRep = unsafeCoerce asteriskToken
   enumRep = asteriskToken
 
-instance EnumRep SyntaxKind AsteriskAsteriskToken where
+instance EnumRep SyntaxKind AsteriskAsteriskToken Int where
+  runtimeRep = unsafeCoerce asteriskAsteriskToken
   enumRep = asteriskAsteriskToken
 
-instance EnumRep SyntaxKind SlashToken where
+instance EnumRep SyntaxKind SlashToken Int where
+  runtimeRep = unsafeCoerce slashToken
   enumRep = slashToken
 
-instance EnumRep SyntaxKind PercentToken where
+instance EnumRep SyntaxKind PercentToken Int where
+  runtimeRep = unsafeCoerce percentToken
   enumRep = percentToken
 
-instance EnumRep SyntaxKind PlusPlusToken where
+instance EnumRep SyntaxKind PlusPlusToken Int where
+  runtimeRep = unsafeCoerce plusPlusToken
   enumRep = plusPlusToken
 
-instance EnumRep SyntaxKind MinusMinusToken where
+instance EnumRep SyntaxKind MinusMinusToken Int where
+  runtimeRep = unsafeCoerce minusMinusToken
   enumRep = minusMinusToken
 
-instance EnumRep SyntaxKind LessThanLessThanToken where
+instance EnumRep SyntaxKind LessThanLessThanToken Int where
+  runtimeRep = unsafeCoerce lessThanLessThanToken
   enumRep = lessThanLessThanToken
 
-instance EnumRep SyntaxKind GreaterThanGreaterThanToken where
+instance EnumRep SyntaxKind GreaterThanGreaterThanToken Int where
+  runtimeRep = unsafeCoerce greaterThanGreaterThanToken
   enumRep = greaterThanGreaterThanToken
 
-instance EnumRep SyntaxKind GreaterThanGreaterThanGreaterThanToken where
+instance EnumRep SyntaxKind GreaterThanGreaterThanGreaterThanToken Int where
+  runtimeRep = unsafeCoerce greaterThanGreaterThanGreaterThanToken
   enumRep = greaterThanGreaterThanGreaterThanToken
 
-instance EnumRep SyntaxKind AmpersandToken where
+instance EnumRep SyntaxKind AmpersandToken Int where
+  runtimeRep = unsafeCoerce ampersandToken
   enumRep = ampersandToken
 
-instance EnumRep SyntaxKind BarToken where
+instance EnumRep SyntaxKind BarToken Int where
+  runtimeRep = unsafeCoerce barToken
   enumRep = barToken
 
-instance EnumRep SyntaxKind CaretToken where
+instance EnumRep SyntaxKind CaretToken Int where
+  runtimeRep = unsafeCoerce caretToken
   enumRep = caretToken
 
-instance EnumRep SyntaxKind ExclamationToken where
+instance EnumRep SyntaxKind ExclamationToken Int where
+  runtimeRep = unsafeCoerce exclamationToken
   enumRep = exclamationToken
 
-instance EnumRep SyntaxKind TildeToken where
+instance EnumRep SyntaxKind TildeToken Int where
+  runtimeRep = unsafeCoerce tildeToken
   enumRep = tildeToken
 
-instance EnumRep SyntaxKind AmpersandAmpersandToken where
+instance EnumRep SyntaxKind AmpersandAmpersandToken Int where
+  runtimeRep = unsafeCoerce ampersandAmpersandToken
   enumRep = ampersandAmpersandToken
 
-instance EnumRep SyntaxKind BarBarToken where
+instance EnumRep SyntaxKind BarBarToken Int where
+  runtimeRep = unsafeCoerce barBarToken
   enumRep = barBarToken
 
-instance EnumRep SyntaxKind QuestionToken where
+instance EnumRep SyntaxKind QuestionToken Int where
+  runtimeRep = unsafeCoerce questionToken
   enumRep = questionToken
 
-instance EnumRep SyntaxKind ColonToken where
+instance EnumRep SyntaxKind ColonToken Int where
+  runtimeRep = unsafeCoerce colonToken
   enumRep = colonToken
 
-instance EnumRep SyntaxKind AtToken where
+instance EnumRep SyntaxKind AtToken Int where
+  runtimeRep = unsafeCoerce atToken
   enumRep = atToken
 
-instance EnumRep SyntaxKind QuestionQuestionToken where
+instance EnumRep SyntaxKind QuestionQuestionToken Int where
+  runtimeRep = unsafeCoerce questionQuestionToken
   enumRep = questionQuestionToken
 
-instance EnumRep SyntaxKind BacktickToken where
+instance EnumRep SyntaxKind BacktickToken Int where
+  runtimeRep = unsafeCoerce backtickToken
   enumRep = backtickToken
 
-instance EnumRep SyntaxKind HashToken where
+instance EnumRep SyntaxKind HashToken Int where
+  runtimeRep = unsafeCoerce hashToken
   enumRep = hashToken
 
-instance EnumRep SyntaxKind EqualsToken where
+instance EnumRep SyntaxKind EqualsToken Int where
+  runtimeRep = unsafeCoerce equalsToken
   enumRep = equalsToken
 
-instance EnumRep SyntaxKind PlusEqualsToken where
+instance EnumRep SyntaxKind PlusEqualsToken Int where
+  runtimeRep = unsafeCoerce plusEqualsToken
   enumRep = plusEqualsToken
 
-instance EnumRep SyntaxKind MinusEqualsToken where
+instance EnumRep SyntaxKind MinusEqualsToken Int where
+  runtimeRep = unsafeCoerce minusEqualsToken
   enumRep = minusEqualsToken
 
-instance EnumRep SyntaxKind AsteriskEqualsToken where
+instance EnumRep SyntaxKind AsteriskEqualsToken Int where
+  runtimeRep = unsafeCoerce asteriskEqualsToken
   enumRep = asteriskEqualsToken
 
-instance EnumRep SyntaxKind AsteriskAsteriskEqualsToken where
+instance EnumRep SyntaxKind AsteriskAsteriskEqualsToken Int where
+  runtimeRep = unsafeCoerce asteriskAsteriskEqualsToken
   enumRep = asteriskAsteriskEqualsToken
 
-instance EnumRep SyntaxKind SlashEqualsToken where
+instance EnumRep SyntaxKind SlashEqualsToken Int where
+  runtimeRep = unsafeCoerce slashEqualsToken
   enumRep = slashEqualsToken
 
-instance EnumRep SyntaxKind PercentEqualsToken where
+instance EnumRep SyntaxKind PercentEqualsToken Int where
+  runtimeRep = unsafeCoerce percentEqualsToken
   enumRep = percentEqualsToken
 
-instance EnumRep SyntaxKind LessThanLessThanEqualsToken where
+instance EnumRep SyntaxKind LessThanLessThanEqualsToken Int where
+  runtimeRep = unsafeCoerce lessThanLessThanEqualsToken
   enumRep = lessThanLessThanEqualsToken
 
-instance EnumRep SyntaxKind GreaterThanGreaterThanEqualsToken where
+instance EnumRep SyntaxKind GreaterThanGreaterThanEqualsToken Int where
+  runtimeRep = unsafeCoerce greaterThanGreaterThanEqualsToken
   enumRep = greaterThanGreaterThanEqualsToken
 
-instance EnumRep SyntaxKind GreaterThanGreaterThanGreaterThanEqualsToken where
+instance EnumRep SyntaxKind GreaterThanGreaterThanGreaterThanEqualsToken Int where
+  runtimeRep = unsafeCoerce greaterThanGreaterThanGreaterThanEqualsToken
   enumRep = greaterThanGreaterThanGreaterThanEqualsToken
 
-instance EnumRep SyntaxKind AmpersandEqualsToken where
+instance EnumRep SyntaxKind AmpersandEqualsToken Int where
+  runtimeRep = unsafeCoerce ampersandEqualsToken
   enumRep = ampersandEqualsToken
 
-instance EnumRep SyntaxKind BarEqualsToken where
+instance EnumRep SyntaxKind BarEqualsToken Int where
+  runtimeRep = unsafeCoerce barEqualsToken
   enumRep = barEqualsToken
 
-instance EnumRep SyntaxKind BarBarEqualsToken where
+instance EnumRep SyntaxKind BarBarEqualsToken Int where
+  runtimeRep = unsafeCoerce barBarEqualsToken
   enumRep = barBarEqualsToken
 
-instance EnumRep SyntaxKind AmpersandAmpersandEqualsToken where
+instance EnumRep SyntaxKind AmpersandAmpersandEqualsToken Int where
+  runtimeRep = unsafeCoerce ampersandAmpersandEqualsToken
   enumRep = ampersandAmpersandEqualsToken
 
-instance EnumRep SyntaxKind QuestionQuestionEqualsToken where
+instance EnumRep SyntaxKind QuestionQuestionEqualsToken Int where
+  runtimeRep = unsafeCoerce questionQuestionEqualsToken
   enumRep = questionQuestionEqualsToken
 
-instance EnumRep SyntaxKind CaretEqualsToken where
+instance EnumRep SyntaxKind CaretEqualsToken Int where
+  runtimeRep = unsafeCoerce caretEqualsToken
   enumRep = caretEqualsToken
 
-instance EnumRep SyntaxKind Identifier where
+instance EnumRep SyntaxKind Identifier Int where
+  runtimeRep = unsafeCoerce identifier
   enumRep = identifier
 
-instance EnumRep SyntaxKind PrivateIdentifier where
+instance EnumRep SyntaxKind PrivateIdentifier Int where
+  runtimeRep = unsafeCoerce privateIdentifier
   enumRep = privateIdentifier
 
-instance EnumRep SyntaxKind BreakKeyword where
+instance EnumRep SyntaxKind BreakKeyword Int where
+  runtimeRep = unsafeCoerce breakKeyword
   enumRep = breakKeyword
 
-instance EnumRep SyntaxKind CaseKeyword where
+instance EnumRep SyntaxKind CaseKeyword Int where
+  runtimeRep = unsafeCoerce caseKeyword
   enumRep = caseKeyword
 
-instance EnumRep SyntaxKind CatchKeyword where
+instance EnumRep SyntaxKind CatchKeyword Int where
+  runtimeRep = unsafeCoerce catchKeyword
   enumRep = catchKeyword
 
-instance EnumRep SyntaxKind ClassKeyword where
+instance EnumRep SyntaxKind ClassKeyword Int where
+  runtimeRep = unsafeCoerce classKeyword
   enumRep = classKeyword
 
-instance EnumRep SyntaxKind ConstKeyword where
+instance EnumRep SyntaxKind ConstKeyword Int where
+  runtimeRep = unsafeCoerce constKeyword
   enumRep = constKeyword
 
-instance EnumRep SyntaxKind ContinueKeyword where
+instance EnumRep SyntaxKind ContinueKeyword Int where
+  runtimeRep = unsafeCoerce continueKeyword
   enumRep = continueKeyword
 
-instance EnumRep SyntaxKind DebuggerKeyword where
+instance EnumRep SyntaxKind DebuggerKeyword Int where
+  runtimeRep = unsafeCoerce debuggerKeyword
   enumRep = debuggerKeyword
 
-instance EnumRep SyntaxKind DefaultKeyword where
+instance EnumRep SyntaxKind DefaultKeyword Int where
+  runtimeRep = unsafeCoerce defaultKeyword
   enumRep = defaultKeyword
 
-instance EnumRep SyntaxKind DeleteKeyword where
+instance EnumRep SyntaxKind DeleteKeyword Int where
+  runtimeRep = unsafeCoerce deleteKeyword
   enumRep = deleteKeyword
 
-instance EnumRep SyntaxKind DoKeyword where
+instance EnumRep SyntaxKind DoKeyword Int where
+  runtimeRep = unsafeCoerce doKeyword
   enumRep = doKeyword
 
-instance EnumRep SyntaxKind ElseKeyword where
+instance EnumRep SyntaxKind ElseKeyword Int where
+  runtimeRep = unsafeCoerce elseKeyword
   enumRep = elseKeyword
 
-instance EnumRep SyntaxKind EnumKeyword where
+instance EnumRep SyntaxKind EnumKeyword Int where
+  runtimeRep = unsafeCoerce enumKeyword
   enumRep = enumKeyword
 
-instance EnumRep SyntaxKind ExportKeyword where
+instance EnumRep SyntaxKind ExportKeyword Int where
+  runtimeRep = unsafeCoerce exportKeyword
   enumRep = exportKeyword
 
-instance EnumRep SyntaxKind ExtendsKeyword where
+instance EnumRep SyntaxKind ExtendsKeyword Int where
+  runtimeRep = unsafeCoerce extendsKeyword
   enumRep = extendsKeyword
 
-instance EnumRep SyntaxKind FalseKeyword where
+instance EnumRep SyntaxKind FalseKeyword Int where
+  runtimeRep = unsafeCoerce falseKeyword
   enumRep = falseKeyword
 
-instance EnumRep SyntaxKind FinallyKeyword where
+instance EnumRep SyntaxKind FinallyKeyword Int where
+  runtimeRep = unsafeCoerce finallyKeyword
   enumRep = finallyKeyword
 
-instance EnumRep SyntaxKind ForKeyword where
+instance EnumRep SyntaxKind ForKeyword Int where
+  runtimeRep = unsafeCoerce forKeyword
   enumRep = forKeyword
 
-instance EnumRep SyntaxKind FunctionKeyword where
+instance EnumRep SyntaxKind FunctionKeyword Int where
+  runtimeRep = unsafeCoerce functionKeyword
   enumRep = functionKeyword
 
-instance EnumRep SyntaxKind IfKeyword where
+instance EnumRep SyntaxKind IfKeyword Int where
+  runtimeRep = unsafeCoerce ifKeyword
   enumRep = ifKeyword
 
-instance EnumRep SyntaxKind ImportKeyword where
+instance EnumRep SyntaxKind ImportKeyword Int where
+  runtimeRep = unsafeCoerce importKeyword
   enumRep = importKeyword
 
-instance EnumRep SyntaxKind InKeyword where
+instance EnumRep SyntaxKind InKeyword Int where
+  runtimeRep = unsafeCoerce inKeyword
   enumRep = inKeyword
 
-instance EnumRep SyntaxKind InstanceOfKeyword where
+instance EnumRep SyntaxKind InstanceOfKeyword Int where
+  runtimeRep = unsafeCoerce instanceOfKeyword
   enumRep = instanceOfKeyword
 
-instance EnumRep SyntaxKind NewKeyword where
+instance EnumRep SyntaxKind NewKeyword Int where
+  runtimeRep = unsafeCoerce newKeyword
   enumRep = newKeyword
 
-instance EnumRep SyntaxKind NullKeyword where
+instance EnumRep SyntaxKind NullKeyword Int where
+  runtimeRep = unsafeCoerce nullKeyword
   enumRep = nullKeyword
 
-instance EnumRep SyntaxKind ReturnKeyword where
+instance EnumRep SyntaxKind ReturnKeyword Int where
+  runtimeRep = unsafeCoerce returnKeyword
   enumRep = returnKeyword
 
-instance EnumRep SyntaxKind SuperKeyword where
+instance EnumRep SyntaxKind SuperKeyword Int where
+  runtimeRep = unsafeCoerce superKeyword
   enumRep = superKeyword
 
-instance EnumRep SyntaxKind SwitchKeyword where
+instance EnumRep SyntaxKind SwitchKeyword Int where
+  runtimeRep = unsafeCoerce switchKeyword
   enumRep = switchKeyword
 
-instance EnumRep SyntaxKind ThisKeyword where
+instance EnumRep SyntaxKind ThisKeyword Int where
+  runtimeRep = unsafeCoerce thisKeyword
   enumRep = thisKeyword
 
-instance EnumRep SyntaxKind ThrowKeyword where
+instance EnumRep SyntaxKind ThrowKeyword Int where
+  runtimeRep = unsafeCoerce throwKeyword
   enumRep = throwKeyword
 
-instance EnumRep SyntaxKind TrueKeyword where
+instance EnumRep SyntaxKind TrueKeyword Int where
+  runtimeRep = unsafeCoerce trueKeyword
   enumRep = trueKeyword
 
-instance EnumRep SyntaxKind TryKeyword where
+instance EnumRep SyntaxKind TryKeyword Int where
+  runtimeRep = unsafeCoerce tryKeyword
   enumRep = tryKeyword
 
-instance EnumRep SyntaxKind TypeOfKeyword where
+instance EnumRep SyntaxKind TypeOfKeyword Int where
+  runtimeRep = unsafeCoerce typeOfKeyword
   enumRep = typeOfKeyword
 
-instance EnumRep SyntaxKind VarKeyword where
+instance EnumRep SyntaxKind VarKeyword Int where
+  runtimeRep = unsafeCoerce varKeyword
   enumRep = varKeyword
 
-instance EnumRep SyntaxKind VoidKeyword where
+instance EnumRep SyntaxKind VoidKeyword Int where
+  runtimeRep = unsafeCoerce voidKeyword
   enumRep = voidKeyword
 
-instance EnumRep SyntaxKind WhileKeyword where
+instance EnumRep SyntaxKind WhileKeyword Int where
+  runtimeRep = unsafeCoerce whileKeyword
   enumRep = whileKeyword
 
-instance EnumRep SyntaxKind WithKeyword where
+instance EnumRep SyntaxKind WithKeyword Int where
+  runtimeRep = unsafeCoerce withKeyword
   enumRep = withKeyword
 
-instance EnumRep SyntaxKind ImplementsKeyword where
+instance EnumRep SyntaxKind ImplementsKeyword Int where
+  runtimeRep = unsafeCoerce implementsKeyword
   enumRep = implementsKeyword
 
-instance EnumRep SyntaxKind InterfaceKeyword where
+instance EnumRep SyntaxKind InterfaceKeyword Int where
+  runtimeRep = unsafeCoerce interfaceKeyword
   enumRep = interfaceKeyword
 
-instance EnumRep SyntaxKind LetKeyword where
+instance EnumRep SyntaxKind LetKeyword Int where
+  runtimeRep = unsafeCoerce letKeyword
   enumRep = letKeyword
 
-instance EnumRep SyntaxKind PackageKeyword where
+instance EnumRep SyntaxKind PackageKeyword Int where
+  runtimeRep = unsafeCoerce packageKeyword
   enumRep = packageKeyword
 
-instance EnumRep SyntaxKind PrivateKeyword where
+instance EnumRep SyntaxKind PrivateKeyword Int where
+  runtimeRep = unsafeCoerce privateKeyword
   enumRep = privateKeyword
 
-instance EnumRep SyntaxKind ProtectedKeyword where
+instance EnumRep SyntaxKind ProtectedKeyword Int where
+  runtimeRep = unsafeCoerce protectedKeyword
   enumRep = protectedKeyword
 
-instance EnumRep SyntaxKind PublicKeyword where
+instance EnumRep SyntaxKind PublicKeyword Int where
+  runtimeRep = unsafeCoerce publicKeyword
   enumRep = publicKeyword
 
-instance EnumRep SyntaxKind StaticKeyword where
+instance EnumRep SyntaxKind StaticKeyword Int where
+  runtimeRep = unsafeCoerce staticKeyword
   enumRep = staticKeyword
 
-instance EnumRep SyntaxKind YieldKeyword where
+instance EnumRep SyntaxKind YieldKeyword Int where
+  runtimeRep = unsafeCoerce yieldKeyword
   enumRep = yieldKeyword
 
-instance EnumRep SyntaxKind AbstractKeyword where
+instance EnumRep SyntaxKind AbstractKeyword Int where
+  runtimeRep = unsafeCoerce abstractKeyword
   enumRep = abstractKeyword
 
-instance EnumRep SyntaxKind AsKeyword where
+instance EnumRep SyntaxKind AsKeyword Int where
+  runtimeRep = unsafeCoerce asKeyword
   enumRep = asKeyword
 
-instance EnumRep SyntaxKind AssertsKeyword where
+instance EnumRep SyntaxKind AssertsKeyword Int where
+  runtimeRep = unsafeCoerce assertsKeyword
   enumRep = assertsKeyword
 
-instance EnumRep SyntaxKind AnyKeyword where
+instance EnumRep SyntaxKind AnyKeyword Int where
+  runtimeRep = unsafeCoerce anyKeyword
   enumRep = anyKeyword
 
-instance EnumRep SyntaxKind AsyncKeyword where
+instance EnumRep SyntaxKind AsyncKeyword Int where
+  runtimeRep = unsafeCoerce asyncKeyword
   enumRep = asyncKeyword
 
-instance EnumRep SyntaxKind AwaitKeyword where
+instance EnumRep SyntaxKind AwaitKeyword Int where
+  runtimeRep = unsafeCoerce awaitKeyword
   enumRep = awaitKeyword
 
-instance EnumRep SyntaxKind BooleanKeyword where
+instance EnumRep SyntaxKind BooleanKeyword Int where
+  runtimeRep = unsafeCoerce booleanKeyword
   enumRep = booleanKeyword
 
-instance EnumRep SyntaxKind ConstructorKeyword where
+instance EnumRep SyntaxKind ConstructorKeyword Int where
+  runtimeRep = unsafeCoerce constructorKeyword
   enumRep = constructorKeyword
 
-instance EnumRep SyntaxKind DeclareKeyword where
+instance EnumRep SyntaxKind DeclareKeyword Int where
+  runtimeRep = unsafeCoerce declareKeyword
   enumRep = declareKeyword
 
-instance EnumRep SyntaxKind GetKeyword where
+instance EnumRep SyntaxKind GetKeyword Int where
+  runtimeRep = unsafeCoerce getKeyword
   enumRep = getKeyword
 
-instance EnumRep SyntaxKind InferKeyword where
+instance EnumRep SyntaxKind InferKeyword Int where
+  runtimeRep = unsafeCoerce inferKeyword
   enumRep = inferKeyword
 
-instance EnumRep SyntaxKind IntrinsicKeyword where
+instance EnumRep SyntaxKind IntrinsicKeyword Int where
+  runtimeRep = unsafeCoerce intrinsicKeyword
   enumRep = intrinsicKeyword
 
-instance EnumRep SyntaxKind IsKeyword where
+instance EnumRep SyntaxKind IsKeyword Int where
+  runtimeRep = unsafeCoerce isKeyword
   enumRep = isKeyword
 
-instance EnumRep SyntaxKind KeyOfKeyword where
+instance EnumRep SyntaxKind KeyOfKeyword Int where
+  runtimeRep = unsafeCoerce keyOfKeyword
   enumRep = keyOfKeyword
 
-instance EnumRep SyntaxKind ModuleKeyword where
+instance EnumRep SyntaxKind ModuleKeyword Int where
+  runtimeRep = unsafeCoerce moduleKeyword
   enumRep = moduleKeyword
 
-instance EnumRep SyntaxKind NamespaceKeyword where
+instance EnumRep SyntaxKind NamespaceKeyword Int where
+  runtimeRep = unsafeCoerce namespaceKeyword
   enumRep = namespaceKeyword
 
-instance EnumRep SyntaxKind NeverKeyword where
+instance EnumRep SyntaxKind NeverKeyword Int where
+  runtimeRep = unsafeCoerce neverKeyword
   enumRep = neverKeyword
 
-instance EnumRep SyntaxKind ReadonlyKeyword where
+instance EnumRep SyntaxKind ReadonlyKeyword Int where
+  runtimeRep = unsafeCoerce readonlyKeyword
   enumRep = readonlyKeyword
 
-instance EnumRep SyntaxKind RequireKeyword where
+instance EnumRep SyntaxKind RequireKeyword Int where
+  runtimeRep = unsafeCoerce requireKeyword
   enumRep = requireKeyword
 
-instance EnumRep SyntaxKind NumberKeyword where
+instance EnumRep SyntaxKind NumberKeyword Int where
+  runtimeRep = unsafeCoerce numberKeyword
   enumRep = numberKeyword
 
-instance EnumRep SyntaxKind ObjectKeyword where
+instance EnumRep SyntaxKind ObjectKeyword Int where
+  runtimeRep = unsafeCoerce objectKeyword
   enumRep = objectKeyword
 
-instance EnumRep SyntaxKind SetKeyword where
+instance EnumRep SyntaxKind SetKeyword Int where
+  runtimeRep = unsafeCoerce setKeyword
   enumRep = setKeyword
 
-instance EnumRep SyntaxKind StringKeyword where
+instance EnumRep SyntaxKind StringKeyword Int where
+  runtimeRep = unsafeCoerce stringKeyword
   enumRep = stringKeyword
 
-instance EnumRep SyntaxKind SymbolKeyword where
+instance EnumRep SyntaxKind SymbolKeyword Int where
+  runtimeRep = unsafeCoerce symbolKeyword
   enumRep = symbolKeyword
 
-instance EnumRep SyntaxKind TypeKeyword where
+instance EnumRep SyntaxKind TypeKeyword Int where
+  runtimeRep = unsafeCoerce typeKeyword
   enumRep = typeKeyword
 
-instance EnumRep SyntaxKind UndefinedKeyword where
+instance EnumRep SyntaxKind UndefinedKeyword Int where
+  runtimeRep = unsafeCoerce undefinedKeyword
   enumRep = undefinedKeyword
 
-instance EnumRep SyntaxKind UniqueKeyword where
+instance EnumRep SyntaxKind UniqueKeyword Int where
+  runtimeRep = unsafeCoerce uniqueKeyword
   enumRep = uniqueKeyword
 
-instance EnumRep SyntaxKind UnknownKeyword where
+instance EnumRep SyntaxKind UnknownKeyword Int where
+  runtimeRep = unsafeCoerce unknownKeyword
   enumRep = unknownKeyword
 
-instance EnumRep SyntaxKind FromKeyword where
+instance EnumRep SyntaxKind FromKeyword Int where
+  runtimeRep = unsafeCoerce fromKeyword
   enumRep = fromKeyword
 
-instance EnumRep SyntaxKind GlobalKeyword where
+instance EnumRep SyntaxKind GlobalKeyword Int where
+  runtimeRep = unsafeCoerce globalKeyword
   enumRep = globalKeyword
 
-instance EnumRep SyntaxKind BigIntKeyword where
+instance EnumRep SyntaxKind BigIntKeyword Int where
+  runtimeRep = unsafeCoerce bigIntKeyword
   enumRep = bigIntKeyword
 
-instance EnumRep SyntaxKind OverrideKeyword where
+instance EnumRep SyntaxKind OverrideKeyword Int where
+  runtimeRep = unsafeCoerce overrideKeyword
   enumRep = overrideKeyword
 
-instance EnumRep SyntaxKind OfKeyword where
+instance EnumRep SyntaxKind OfKeyword Int where
+  runtimeRep = unsafeCoerce ofKeyword
   enumRep = ofKeyword
 
-instance EnumRep SyntaxKind QualifiedName where
+instance EnumRep SyntaxKind QualifiedName Int where
+  runtimeRep = unsafeCoerce qualifiedName
   enumRep = qualifiedName
 
-instance EnumRep SyntaxKind ComputedPropertyName where
+instance EnumRep SyntaxKind ComputedPropertyName Int where
+  runtimeRep = unsafeCoerce computedPropertyName
   enumRep = computedPropertyName
 
-instance EnumRep SyntaxKind TypeParameter where
+instance EnumRep SyntaxKind TypeParameter Int where
+  runtimeRep = unsafeCoerce typeParameter
   enumRep = typeParameter
 
-instance EnumRep SyntaxKind Parameter where
+instance EnumRep SyntaxKind Parameter Int where
+  runtimeRep = unsafeCoerce parameter
   enumRep = parameter
 
-instance EnumRep SyntaxKind Decorator where
+instance EnumRep SyntaxKind Decorator Int where
+  runtimeRep = unsafeCoerce decorator
   enumRep = decorator
 
-instance EnumRep SyntaxKind PropertySignature where
+instance EnumRep SyntaxKind PropertySignature Int where
+  runtimeRep = unsafeCoerce propertySignature
   enumRep = propertySignature
 
-instance EnumRep SyntaxKind PropertyDeclaration where
+instance EnumRep SyntaxKind PropertyDeclaration Int where
+  runtimeRep = unsafeCoerce propertyDeclaration
   enumRep = propertyDeclaration
 
-instance EnumRep SyntaxKind MethodSignature where
+instance EnumRep SyntaxKind MethodSignature Int where
+  runtimeRep = unsafeCoerce methodSignature
   enumRep = methodSignature
 
-instance EnumRep SyntaxKind MethodDeclaration where
+instance EnumRep SyntaxKind MethodDeclaration Int where
+  runtimeRep = unsafeCoerce methodDeclaration
   enumRep = methodDeclaration
 
-instance EnumRep SyntaxKind ClassStaticBlockDeclaration where
+instance EnumRep SyntaxKind ClassStaticBlockDeclaration Int where
+  runtimeRep = unsafeCoerce classStaticBlockDeclaration
   enumRep = classStaticBlockDeclaration
 
-instance EnumRep SyntaxKind Constructor where
+instance EnumRep SyntaxKind Constructor Int where
+  runtimeRep = unsafeCoerce constructor
   enumRep = constructor
 
-instance EnumRep SyntaxKind GetAccessor where
+instance EnumRep SyntaxKind GetAccessor Int where
+  runtimeRep = unsafeCoerce getAccessor
   enumRep = getAccessor
 
-instance EnumRep SyntaxKind SetAccessor where
+instance EnumRep SyntaxKind SetAccessor Int where
+  runtimeRep = unsafeCoerce setAccessor
   enumRep = setAccessor
 
-instance EnumRep SyntaxKind CallSignature where
+instance EnumRep SyntaxKind CallSignature Int where
+  runtimeRep = unsafeCoerce callSignature
   enumRep = callSignature
 
-instance EnumRep SyntaxKind ConstructSignature where
+instance EnumRep SyntaxKind ConstructSignature Int where
+  runtimeRep = unsafeCoerce constructSignature
   enumRep = constructSignature
 
-instance EnumRep SyntaxKind IndexSignature where
+instance EnumRep SyntaxKind IndexSignature Int where
+  runtimeRep = unsafeCoerce indexSignature
   enumRep = indexSignature
 
-instance EnumRep SyntaxKind TypePredicate where
+instance EnumRep SyntaxKind TypePredicate Int where
+  runtimeRep = unsafeCoerce typePredicate
   enumRep = typePredicate
 
-instance EnumRep SyntaxKind TypeReference where
+instance EnumRep SyntaxKind TypeReference Int where
+  runtimeRep = unsafeCoerce typeReference
   enumRep = typeReference
 
-instance EnumRep SyntaxKind FunctionType where
+instance EnumRep SyntaxKind FunctionType Int where
+  runtimeRep = unsafeCoerce functionType
   enumRep = functionType
 
-instance EnumRep SyntaxKind ConstructorType where
+instance EnumRep SyntaxKind ConstructorType Int where
+  runtimeRep = unsafeCoerce constructorType
   enumRep = constructorType
 
-instance EnumRep SyntaxKind TypeQuery where
+instance EnumRep SyntaxKind TypeQuery Int where
+  runtimeRep = unsafeCoerce typeQuery
   enumRep = typeQuery
 
-instance EnumRep SyntaxKind TypeLiteral where
+instance EnumRep SyntaxKind TypeLiteral Int where
+  runtimeRep = unsafeCoerce typeLiteral
   enumRep = typeLiteral
 
-instance EnumRep SyntaxKind ArrayType where
+instance EnumRep SyntaxKind ArrayType Int where
+  runtimeRep = unsafeCoerce arrayType
   enumRep = arrayType
 
-instance EnumRep SyntaxKind TupleType where
+instance EnumRep SyntaxKind TupleType Int where
+  runtimeRep = unsafeCoerce tupleType
   enumRep = tupleType
 
-instance EnumRep SyntaxKind OptionalType where
+instance EnumRep SyntaxKind OptionalType Int where
+  runtimeRep = unsafeCoerce optionalType
   enumRep = optionalType
 
-instance EnumRep SyntaxKind RestType where
+instance EnumRep SyntaxKind RestType Int where
+  runtimeRep = unsafeCoerce restType
   enumRep = restType
 
-instance EnumRep SyntaxKind UnionType where
+instance EnumRep SyntaxKind UnionType Int where
+  runtimeRep = unsafeCoerce unionType
   enumRep = unionType
 
-instance EnumRep SyntaxKind IntersectionType where
+instance EnumRep SyntaxKind IntersectionType Int where
+  runtimeRep = unsafeCoerce intersectionType
   enumRep = intersectionType
 
-instance EnumRep SyntaxKind ConditionalType where
+instance EnumRep SyntaxKind ConditionalType Int where
+  runtimeRep = unsafeCoerce conditionalType
   enumRep = conditionalType
 
-instance EnumRep SyntaxKind InferType where
+instance EnumRep SyntaxKind InferType Int where
+  runtimeRep = unsafeCoerce inferType
   enumRep = inferType
 
-instance EnumRep SyntaxKind ParenthesizedType where
+instance EnumRep SyntaxKind ParenthesizedType Int where
+  runtimeRep = unsafeCoerce parenthesizedType
   enumRep = parenthesizedType
 
-instance EnumRep SyntaxKind ThisType where
+instance EnumRep SyntaxKind ThisType Int where
+  runtimeRep = unsafeCoerce thisType
   enumRep = thisType
 
-instance EnumRep SyntaxKind TypeOperator where
+instance EnumRep SyntaxKind TypeOperator Int where
+  runtimeRep = unsafeCoerce typeOperator
   enumRep = typeOperator
 
-instance EnumRep SyntaxKind IndexedAccessType where
+instance EnumRep SyntaxKind IndexedAccessType Int where
+  runtimeRep = unsafeCoerce indexedAccessType
   enumRep = indexedAccessType
 
-instance EnumRep SyntaxKind MappedType where
+instance EnumRep SyntaxKind MappedType Int where
+  runtimeRep = unsafeCoerce mappedType
   enumRep = mappedType
 
-instance EnumRep SyntaxKind LiteralType where
+instance EnumRep SyntaxKind LiteralType Int where
+  runtimeRep = unsafeCoerce literalType
   enumRep = literalType
 
-instance EnumRep SyntaxKind NamedTupleMember where
+instance EnumRep SyntaxKind NamedTupleMember Int where
+  runtimeRep = unsafeCoerce namedTupleMember
   enumRep = namedTupleMember
 
-instance EnumRep SyntaxKind TemplateLiteralType where
+instance EnumRep SyntaxKind TemplateLiteralType Int where
+  runtimeRep = unsafeCoerce templateLiteralType
   enumRep = templateLiteralType
 
-instance EnumRep SyntaxKind TemplateLiteralTypeSpan where
+instance EnumRep SyntaxKind TemplateLiteralTypeSpan Int where
+  runtimeRep = unsafeCoerce templateLiteralTypeSpan
   enumRep = templateLiteralTypeSpan
 
-instance EnumRep SyntaxKind ImportType where
+instance EnumRep SyntaxKind ImportType Int where
+  runtimeRep = unsafeCoerce importType
   enumRep = importType
 
-instance EnumRep SyntaxKind ObjectBindingPattern where
+instance EnumRep SyntaxKind ObjectBindingPattern Int where
+  runtimeRep = unsafeCoerce objectBindingPattern
   enumRep = objectBindingPattern
 
-instance EnumRep SyntaxKind ArrayBindingPattern where
+instance EnumRep SyntaxKind ArrayBindingPattern Int where
+  runtimeRep = unsafeCoerce arrayBindingPattern
   enumRep = arrayBindingPattern
 
-instance EnumRep SyntaxKind BindingElement where
+instance EnumRep SyntaxKind BindingElement Int where
+  runtimeRep = unsafeCoerce bindingElement
   enumRep = bindingElement
 
-instance EnumRep SyntaxKind ArrayLiteralExpression where
+instance EnumRep SyntaxKind ArrayLiteralExpression Int where
+  runtimeRep = unsafeCoerce arrayLiteralExpression
   enumRep = arrayLiteralExpression
 
-instance EnumRep SyntaxKind ObjectLiteralExpression where
+instance EnumRep SyntaxKind ObjectLiteralExpression Int where
+  runtimeRep = unsafeCoerce objectLiteralExpression
   enumRep = objectLiteralExpression
 
-instance EnumRep SyntaxKind PropertyAccessExpression where
+instance EnumRep SyntaxKind PropertyAccessExpression Int where
+  runtimeRep = unsafeCoerce propertyAccessExpression
   enumRep = propertyAccessExpression
 
-instance EnumRep SyntaxKind ElementAccessExpression where
+instance EnumRep SyntaxKind ElementAccessExpression Int where
+  runtimeRep = unsafeCoerce elementAccessExpression
   enumRep = elementAccessExpression
 
-instance EnumRep SyntaxKind CallExpression where
+instance EnumRep SyntaxKind CallExpression Int where
+  runtimeRep = unsafeCoerce callExpression
   enumRep = callExpression
 
-instance EnumRep SyntaxKind NewExpression where
+instance EnumRep SyntaxKind NewExpression Int where
+  runtimeRep = unsafeCoerce newExpression
   enumRep = newExpression
 
-instance EnumRep SyntaxKind TaggedTemplateExpression where
+instance EnumRep SyntaxKind TaggedTemplateExpression Int where
+  runtimeRep = unsafeCoerce taggedTemplateExpression
   enumRep = taggedTemplateExpression
 
-instance EnumRep SyntaxKind TypeAssertionExpression where
+instance EnumRep SyntaxKind TypeAssertionExpression Int where
+  runtimeRep = unsafeCoerce typeAssertionExpression
   enumRep = typeAssertionExpression
 
-instance EnumRep SyntaxKind ParenthesizedExpression where
+instance EnumRep SyntaxKind ParenthesizedExpression Int where
+  runtimeRep = unsafeCoerce parenthesizedExpression
   enumRep = parenthesizedExpression
 
-instance EnumRep SyntaxKind FunctionExpression where
+instance EnumRep SyntaxKind FunctionExpression Int where
+  runtimeRep = unsafeCoerce functionExpression
   enumRep = functionExpression
 
-instance EnumRep SyntaxKind ArrowFunction where
+instance EnumRep SyntaxKind ArrowFunction Int where
+  runtimeRep = unsafeCoerce arrowFunction
   enumRep = arrowFunction
 
-instance EnumRep SyntaxKind DeleteExpression where
+instance EnumRep SyntaxKind DeleteExpression Int where
+  runtimeRep = unsafeCoerce deleteExpression
   enumRep = deleteExpression
 
-instance EnumRep SyntaxKind TypeOfExpression where
+instance EnumRep SyntaxKind TypeOfExpression Int where
+  runtimeRep = unsafeCoerce typeOfExpression
   enumRep = typeOfExpression
 
-instance EnumRep SyntaxKind VoidExpression where
+instance EnumRep SyntaxKind VoidExpression Int where
+  runtimeRep = unsafeCoerce voidExpression
   enumRep = voidExpression
 
-instance EnumRep SyntaxKind AwaitExpression where
+instance EnumRep SyntaxKind AwaitExpression Int where
+  runtimeRep = unsafeCoerce awaitExpression
   enumRep = awaitExpression
 
-instance EnumRep SyntaxKind PrefixUnaryExpression where
+instance EnumRep SyntaxKind PrefixUnaryExpression Int where
+  runtimeRep = unsafeCoerce prefixUnaryExpression
   enumRep = prefixUnaryExpression
 
-instance EnumRep SyntaxKind PostfixUnaryExpression where
+instance EnumRep SyntaxKind PostfixUnaryExpression Int where
+  runtimeRep = unsafeCoerce postfixUnaryExpression
   enumRep = postfixUnaryExpression
 
-instance EnumRep SyntaxKind BinaryExpression where
+instance EnumRep SyntaxKind BinaryExpression Int where
+  runtimeRep = unsafeCoerce binaryExpression
   enumRep = binaryExpression
 
-instance EnumRep SyntaxKind ConditionalExpression where
+instance EnumRep SyntaxKind ConditionalExpression Int where
+  runtimeRep = unsafeCoerce conditionalExpression
   enumRep = conditionalExpression
 
-instance EnumRep SyntaxKind TemplateExpression where
+instance EnumRep SyntaxKind TemplateExpression Int where
+  runtimeRep = unsafeCoerce templateExpression
   enumRep = templateExpression
 
-instance EnumRep SyntaxKind YieldExpression where
+instance EnumRep SyntaxKind YieldExpression Int where
+  runtimeRep = unsafeCoerce yieldExpression
   enumRep = yieldExpression
 
-instance EnumRep SyntaxKind SpreadElement where
+instance EnumRep SyntaxKind SpreadElement Int where
+  runtimeRep = unsafeCoerce spreadElement
   enumRep = spreadElement
 
-instance EnumRep SyntaxKind ClassExpression where
+instance EnumRep SyntaxKind ClassExpression Int where
+  runtimeRep = unsafeCoerce classExpression
   enumRep = classExpression
 
-instance EnumRep SyntaxKind OmittedExpression where
+instance EnumRep SyntaxKind OmittedExpression Int where
+  runtimeRep = unsafeCoerce omittedExpression
   enumRep = omittedExpression
 
-instance EnumRep SyntaxKind ExpressionWithTypeArguments where
+instance EnumRep SyntaxKind ExpressionWithTypeArguments Int where
+  runtimeRep = unsafeCoerce expressionWithTypeArguments
   enumRep = expressionWithTypeArguments
 
-instance EnumRep SyntaxKind AsExpression where
+instance EnumRep SyntaxKind AsExpression Int where
+  runtimeRep = unsafeCoerce asExpression
   enumRep = asExpression
 
-instance EnumRep SyntaxKind NonNullExpression where
+instance EnumRep SyntaxKind NonNullExpression Int where
+  runtimeRep = unsafeCoerce nonNullExpression
   enumRep = nonNullExpression
 
-instance EnumRep SyntaxKind MetaProperty where
+instance EnumRep SyntaxKind MetaProperty Int where
+  runtimeRep = unsafeCoerce metaProperty
   enumRep = metaProperty
 
-instance EnumRep SyntaxKind SyntheticExpression where
+instance EnumRep SyntaxKind SyntheticExpression Int where
+  runtimeRep = unsafeCoerce syntheticExpression
   enumRep = syntheticExpression
 
-instance EnumRep SyntaxKind TemplateSpan where
+instance EnumRep SyntaxKind TemplateSpan Int where
+  runtimeRep = unsafeCoerce templateSpan
   enumRep = templateSpan
 
-instance EnumRep SyntaxKind SemicolonClassElement where
+instance EnumRep SyntaxKind SemicolonClassElement Int where
+  runtimeRep = unsafeCoerce semicolonClassElement
   enumRep = semicolonClassElement
 
-instance EnumRep SyntaxKind Block where
+instance EnumRep SyntaxKind Block Int where
+  runtimeRep = unsafeCoerce block
   enumRep = block
 
-instance EnumRep SyntaxKind EmptyStatement where
+instance EnumRep SyntaxKind EmptyStatement Int where
+  runtimeRep = unsafeCoerce emptyStatement
   enumRep = emptyStatement
 
-instance EnumRep SyntaxKind VariableStatement where
+instance EnumRep SyntaxKind VariableStatement Int where
+  runtimeRep = unsafeCoerce variableStatement
   enumRep = variableStatement
 
-instance EnumRep SyntaxKind ExpressionStatement where
+instance EnumRep SyntaxKind ExpressionStatement Int where
+  runtimeRep = unsafeCoerce expressionStatement
   enumRep = expressionStatement
 
-instance EnumRep SyntaxKind IfStatement where
+instance EnumRep SyntaxKind IfStatement Int where
+  runtimeRep = unsafeCoerce ifStatement
   enumRep = ifStatement
 
-instance EnumRep SyntaxKind DoStatement where
+instance EnumRep SyntaxKind DoStatement Int where
+  runtimeRep = unsafeCoerce doStatement
   enumRep = doStatement
 
-instance EnumRep SyntaxKind WhileStatement where
+instance EnumRep SyntaxKind WhileStatement Int where
+  runtimeRep = unsafeCoerce whileStatement
   enumRep = whileStatement
 
-instance EnumRep SyntaxKind ForStatement where
+instance EnumRep SyntaxKind ForStatement Int where
+  runtimeRep = unsafeCoerce forStatement
   enumRep = forStatement
 
-instance EnumRep SyntaxKind ForInStatement where
+instance EnumRep SyntaxKind ForInStatement Int where
+  runtimeRep = unsafeCoerce forInStatement
   enumRep = forInStatement
 
-instance EnumRep SyntaxKind ForOfStatement where
+instance EnumRep SyntaxKind ForOfStatement Int where
+  runtimeRep = unsafeCoerce forOfStatement
   enumRep = forOfStatement
 
-instance EnumRep SyntaxKind ContinueStatement where
+instance EnumRep SyntaxKind ContinueStatement Int where
+  runtimeRep = unsafeCoerce continueStatement
   enumRep = continueStatement
 
-instance EnumRep SyntaxKind BreakStatement where
+instance EnumRep SyntaxKind BreakStatement Int where
+  runtimeRep = unsafeCoerce breakStatement
   enumRep = breakStatement
 
-instance EnumRep SyntaxKind ReturnStatement where
+instance EnumRep SyntaxKind ReturnStatement Int where
+  runtimeRep = unsafeCoerce returnStatement
   enumRep = returnStatement
 
-instance EnumRep SyntaxKind WithStatement where
+instance EnumRep SyntaxKind WithStatement Int where
+  runtimeRep = unsafeCoerce withStatement
   enumRep = withStatement
 
-instance EnumRep SyntaxKind SwitchStatement where
+instance EnumRep SyntaxKind SwitchStatement Int where
+  runtimeRep = unsafeCoerce switchStatement
   enumRep = switchStatement
 
-instance EnumRep SyntaxKind LabeledStatement where
+instance EnumRep SyntaxKind LabeledStatement Int where
+  runtimeRep = unsafeCoerce labeledStatement
   enumRep = labeledStatement
 
-instance EnumRep SyntaxKind ThrowStatement where
+instance EnumRep SyntaxKind ThrowStatement Int where
+  runtimeRep = unsafeCoerce throwStatement
   enumRep = throwStatement
 
-instance EnumRep SyntaxKind TryStatement where
+instance EnumRep SyntaxKind TryStatement Int where
+  runtimeRep = unsafeCoerce tryStatement
   enumRep = tryStatement
 
-instance EnumRep SyntaxKind DebuggerStatement where
+instance EnumRep SyntaxKind DebuggerStatement Int where
+  runtimeRep = unsafeCoerce debuggerStatement
   enumRep = debuggerStatement
 
-instance EnumRep SyntaxKind VariableDeclaration where
+instance EnumRep SyntaxKind VariableDeclaration Int where
+  runtimeRep = unsafeCoerce variableDeclaration
   enumRep = variableDeclaration
 
-instance EnumRep SyntaxKind VariableDeclarationList where
+instance EnumRep SyntaxKind VariableDeclarationList Int where
+  runtimeRep = unsafeCoerce variableDeclarationList
   enumRep = variableDeclarationList
 
-instance EnumRep SyntaxKind FunctionDeclaration where
+instance EnumRep SyntaxKind FunctionDeclaration Int where
+  runtimeRep = unsafeCoerce functionDeclaration
   enumRep = functionDeclaration
 
-instance EnumRep SyntaxKind ClassDeclaration where
+instance EnumRep SyntaxKind ClassDeclaration Int where
+  runtimeRep = unsafeCoerce classDeclaration
   enumRep = classDeclaration
 
-instance EnumRep SyntaxKind InterfaceDeclaration where
+instance EnumRep SyntaxKind InterfaceDeclaration Int where
+  runtimeRep = unsafeCoerce interfaceDeclaration
   enumRep = interfaceDeclaration
 
-instance EnumRep SyntaxKind TypeAliasDeclaration where
+instance EnumRep SyntaxKind TypeAliasDeclaration Int where
+  runtimeRep = unsafeCoerce typeAliasDeclaration
   enumRep = typeAliasDeclaration
 
-instance EnumRep SyntaxKind EnumDeclaration where
+instance EnumRep SyntaxKind EnumDeclaration Int where
+  runtimeRep = unsafeCoerce enumDeclaration
   enumRep = enumDeclaration
 
-instance EnumRep SyntaxKind ModuleDeclaration where
+instance EnumRep SyntaxKind ModuleDeclaration Int where
+  runtimeRep = unsafeCoerce moduleDeclaration
   enumRep = moduleDeclaration
 
-instance EnumRep SyntaxKind ModuleBlock where
+instance EnumRep SyntaxKind ModuleBlock Int where
+  runtimeRep = unsafeCoerce moduleBlock
   enumRep = moduleBlock
 
-instance EnumRep SyntaxKind CaseBlock where
+instance EnumRep SyntaxKind CaseBlock Int where
+  runtimeRep = unsafeCoerce caseBlock
   enumRep = caseBlock
 
-instance EnumRep SyntaxKind NamespaceExportDeclaration where
+instance EnumRep SyntaxKind NamespaceExportDeclaration Int where
+  runtimeRep = unsafeCoerce namespaceExportDeclaration
   enumRep = namespaceExportDeclaration
 
-instance EnumRep SyntaxKind ImportEqualsDeclaration where
+instance EnumRep SyntaxKind ImportEqualsDeclaration Int where
+  runtimeRep = unsafeCoerce importEqualsDeclaration
   enumRep = importEqualsDeclaration
 
-instance EnumRep SyntaxKind ImportDeclaration where
+instance EnumRep SyntaxKind ImportDeclaration Int where
+  runtimeRep = unsafeCoerce importDeclaration
   enumRep = importDeclaration
 
-instance EnumRep SyntaxKind ImportClause where
+instance EnumRep SyntaxKind ImportClause Int where
+  runtimeRep = unsafeCoerce importClause
   enumRep = importClause
 
-instance EnumRep SyntaxKind NamespaceImport where
+instance EnumRep SyntaxKind NamespaceImport Int where
+  runtimeRep = unsafeCoerce namespaceImport
   enumRep = namespaceImport
 
-instance EnumRep SyntaxKind NamedImports where
+instance EnumRep SyntaxKind NamedImports Int where
+  runtimeRep = unsafeCoerce namedImports
   enumRep = namedImports
 
-instance EnumRep SyntaxKind ImportSpecifier where
+instance EnumRep SyntaxKind ImportSpecifier Int where
+  runtimeRep = unsafeCoerce importSpecifier
   enumRep = importSpecifier
 
-instance EnumRep SyntaxKind ExportAssignment where
+instance EnumRep SyntaxKind ExportAssignment Int where
+  runtimeRep = unsafeCoerce exportAssignment
   enumRep = exportAssignment
 
-instance EnumRep SyntaxKind ExportDeclaration where
+instance EnumRep SyntaxKind ExportDeclaration Int where
+  runtimeRep = unsafeCoerce exportDeclaration
   enumRep = exportDeclaration
 
-instance EnumRep SyntaxKind NamedExports where
+instance EnumRep SyntaxKind NamedExports Int where
+  runtimeRep = unsafeCoerce namedExports
   enumRep = namedExports
 
-instance EnumRep SyntaxKind NamespaceExport where
+instance EnumRep SyntaxKind NamespaceExport Int where
+  runtimeRep = unsafeCoerce namespaceExport
   enumRep = namespaceExport
 
-instance EnumRep SyntaxKind ExportSpecifier where
+instance EnumRep SyntaxKind ExportSpecifier Int where
+  runtimeRep = unsafeCoerce exportSpecifier
   enumRep = exportSpecifier
 
-instance EnumRep SyntaxKind MissingDeclaration where
+instance EnumRep SyntaxKind MissingDeclaration Int where
+  runtimeRep = unsafeCoerce missingDeclaration
   enumRep = missingDeclaration
 
-instance EnumRep SyntaxKind ExternalModuleReference where
+instance EnumRep SyntaxKind ExternalModuleReference Int where
+  runtimeRep = unsafeCoerce externalModuleReference
   enumRep = externalModuleReference
 
-instance EnumRep SyntaxKind JsxElement where
+instance EnumRep SyntaxKind JsxElement Int where
+  runtimeRep = unsafeCoerce jsxElement
   enumRep = jsxElement
 
-instance EnumRep SyntaxKind JsxSelfClosingElement where
+instance EnumRep SyntaxKind JsxSelfClosingElement Int where
+  runtimeRep = unsafeCoerce jsxSelfClosingElement
   enumRep = jsxSelfClosingElement
 
-instance EnumRep SyntaxKind JsxOpeningElement where
+instance EnumRep SyntaxKind JsxOpeningElement Int where
+  runtimeRep = unsafeCoerce jsxOpeningElement
   enumRep = jsxOpeningElement
 
-instance EnumRep SyntaxKind JsxClosingElement where
+instance EnumRep SyntaxKind JsxClosingElement Int where
+  runtimeRep = unsafeCoerce jsxClosingElement
   enumRep = jsxClosingElement
 
-instance EnumRep SyntaxKind JsxFragment where
+instance EnumRep SyntaxKind JsxFragment Int where
+  runtimeRep = unsafeCoerce jsxFragment
   enumRep = jsxFragment
 
-instance EnumRep SyntaxKind JsxOpeningFragment where
+instance EnumRep SyntaxKind JsxOpeningFragment Int where
+  runtimeRep = unsafeCoerce jsxOpeningFragment
   enumRep = jsxOpeningFragment
 
-instance EnumRep SyntaxKind JsxClosingFragment where
+instance EnumRep SyntaxKind JsxClosingFragment Int where
+  runtimeRep = unsafeCoerce jsxClosingFragment
   enumRep = jsxClosingFragment
 
-instance EnumRep SyntaxKind JsxAttribute where
+instance EnumRep SyntaxKind JsxAttribute Int where
+  runtimeRep = unsafeCoerce jsxAttribute
   enumRep = jsxAttribute
 
-instance EnumRep SyntaxKind JsxAttributes where
+instance EnumRep SyntaxKind JsxAttributes Int where
+  runtimeRep = unsafeCoerce jsxAttributes
   enumRep = jsxAttributes
 
-instance EnumRep SyntaxKind JsxSpreadAttribute where
+instance EnumRep SyntaxKind JsxSpreadAttribute Int where
+  runtimeRep = unsafeCoerce jsxSpreadAttribute
   enumRep = jsxSpreadAttribute
 
-instance EnumRep SyntaxKind JsxExpression where
+instance EnumRep SyntaxKind JsxExpression Int where
+  runtimeRep = unsafeCoerce jsxExpression
   enumRep = jsxExpression
 
-instance EnumRep SyntaxKind CaseClause where
+instance EnumRep SyntaxKind CaseClause Int where
+  runtimeRep = unsafeCoerce caseClause
   enumRep = caseClause
 
-instance EnumRep SyntaxKind DefaultClause where
+instance EnumRep SyntaxKind DefaultClause Int where
+  runtimeRep = unsafeCoerce defaultClause
   enumRep = defaultClause
 
-instance EnumRep SyntaxKind HeritageClause where
+instance EnumRep SyntaxKind HeritageClause Int where
+  runtimeRep = unsafeCoerce heritageClause
   enumRep = heritageClause
 
-instance EnumRep SyntaxKind CatchClause where
+instance EnumRep SyntaxKind CatchClause Int where
+  runtimeRep = unsafeCoerce catchClause
   enumRep = catchClause
 
-instance EnumRep SyntaxKind PropertyAssignment where
+instance EnumRep SyntaxKind PropertyAssignment Int where
+  runtimeRep = unsafeCoerce propertyAssignment
   enumRep = propertyAssignment
 
-instance EnumRep SyntaxKind ShorthandPropertyAssignment where
+instance EnumRep SyntaxKind ShorthandPropertyAssignment Int where
+  runtimeRep = unsafeCoerce shorthandPropertyAssignment
   enumRep = shorthandPropertyAssignment
 
-instance EnumRep SyntaxKind SpreadAssignment where
+instance EnumRep SyntaxKind SpreadAssignment Int where
+  runtimeRep = unsafeCoerce spreadAssignment
   enumRep = spreadAssignment
 
-instance EnumRep SyntaxKind EnumMember where
+instance EnumRep SyntaxKind EnumMember Int where
+  runtimeRep = unsafeCoerce enumMember
   enumRep = enumMember
 
-instance EnumRep SyntaxKind UnparsedPrologue where
+instance EnumRep SyntaxKind UnparsedPrologue Int where
+  runtimeRep = unsafeCoerce unparsedPrologue
   enumRep = unparsedPrologue
 
-instance EnumRep SyntaxKind UnparsedPrepend where
+instance EnumRep SyntaxKind UnparsedPrepend Int where
+  runtimeRep = unsafeCoerce unparsedPrepend
   enumRep = unparsedPrepend
 
-instance EnumRep SyntaxKind UnparsedText where
+instance EnumRep SyntaxKind UnparsedText Int where
+  runtimeRep = unsafeCoerce unparsedText
   enumRep = unparsedText
 
-instance EnumRep SyntaxKind UnparsedInternalText where
+instance EnumRep SyntaxKind UnparsedInternalText Int where
+  runtimeRep = unsafeCoerce unparsedInternalText
   enumRep = unparsedInternalText
 
-instance EnumRep SyntaxKind UnparsedSyntheticReference where
+instance EnumRep SyntaxKind UnparsedSyntheticReference Int where
+  runtimeRep = unsafeCoerce unparsedSyntheticReference
   enumRep = unparsedSyntheticReference
 
-instance EnumRep SyntaxKind SourceFile where
+instance EnumRep SyntaxKind SourceFile Int where
+  runtimeRep = unsafeCoerce sourceFile
   enumRep = sourceFile
 
-instance EnumRep SyntaxKind Bundle where
+instance EnumRep SyntaxKind Bundle Int where
+  runtimeRep = unsafeCoerce bundle
   enumRep = bundle
 
-instance EnumRep SyntaxKind UnparsedSource where
+instance EnumRep SyntaxKind UnparsedSource Int where
+  runtimeRep = unsafeCoerce unparsedSource
   enumRep = unparsedSource
 
-instance EnumRep SyntaxKind InputFiles where
+instance EnumRep SyntaxKind InputFiles Int where
+  runtimeRep = unsafeCoerce inputFiles
   enumRep = inputFiles
 
-instance EnumRep SyntaxKind JSDocTypeExpression where
+instance EnumRep SyntaxKind JSDocTypeExpression Int where
+  runtimeRep = unsafeCoerce jSDocTypeExpression
   enumRep = jSDocTypeExpression
 
-instance EnumRep SyntaxKind JSDocNameReference where
+instance EnumRep SyntaxKind JSDocNameReference Int where
+  runtimeRep = unsafeCoerce jSDocNameReference
   enumRep = jSDocNameReference
 
-instance EnumRep SyntaxKind JSDocMemberName where
+instance EnumRep SyntaxKind JSDocMemberName Int where
+  runtimeRep = unsafeCoerce jSDocMemberName
   enumRep = jSDocMemberName
 
-instance EnumRep SyntaxKind JSDocAllType where
+instance EnumRep SyntaxKind JSDocAllType Int where
+  runtimeRep = unsafeCoerce jSDocAllType
   enumRep = jSDocAllType
 
-instance EnumRep SyntaxKind JSDocUnknownType where
+instance EnumRep SyntaxKind JSDocUnknownType Int where
+  runtimeRep = unsafeCoerce jSDocUnknownType
   enumRep = jSDocUnknownType
 
-instance EnumRep SyntaxKind JSDocNullableType where
+instance EnumRep SyntaxKind JSDocNullableType Int where
+  runtimeRep = unsafeCoerce jSDocNullableType
   enumRep = jSDocNullableType
 
-instance EnumRep SyntaxKind JSDocNonNullableType where
+instance EnumRep SyntaxKind JSDocNonNullableType Int where
+  runtimeRep = unsafeCoerce jSDocNonNullableType
   enumRep = jSDocNonNullableType
 
-instance EnumRep SyntaxKind JSDocOptionalType where
+instance EnumRep SyntaxKind JSDocOptionalType Int where
+  runtimeRep = unsafeCoerce jSDocOptionalType
   enumRep = jSDocOptionalType
 
-instance EnumRep SyntaxKind JSDocFunctionType where
+instance EnumRep SyntaxKind JSDocFunctionType Int where
+  runtimeRep = unsafeCoerce jSDocFunctionType
   enumRep = jSDocFunctionType
 
-instance EnumRep SyntaxKind JSDocVariadicType where
+instance EnumRep SyntaxKind JSDocVariadicType Int where
+  runtimeRep = unsafeCoerce jSDocVariadicType
   enumRep = jSDocVariadicType
 
-instance EnumRep SyntaxKind JSDocNamepathType where
+instance EnumRep SyntaxKind JSDocNamepathType Int where
+  runtimeRep = unsafeCoerce jSDocNamepathType
   enumRep = jSDocNamepathType
 
-instance EnumRep SyntaxKind JSDocComment where
+instance EnumRep SyntaxKind JSDocComment Int where
+  runtimeRep = unsafeCoerce jSDocComment
   enumRep = jSDocComment
 
-instance EnumRep SyntaxKind JSDocText where
+instance EnumRep SyntaxKind JSDocText Int where
+  runtimeRep = unsafeCoerce jSDocText
   enumRep = jSDocText
 
-instance EnumRep SyntaxKind JSDocTypeLiteral where
+instance EnumRep SyntaxKind JSDocTypeLiteral Int where
+  runtimeRep = unsafeCoerce jSDocTypeLiteral
   enumRep = jSDocTypeLiteral
 
-instance EnumRep SyntaxKind JSDocSignature where
+instance EnumRep SyntaxKind JSDocSignature Int where
+  runtimeRep = unsafeCoerce jSDocSignature
   enumRep = jSDocSignature
 
-instance EnumRep SyntaxKind JSDocLink where
+instance EnumRep SyntaxKind JSDocLink Int where
+  runtimeRep = unsafeCoerce jSDocLink
   enumRep = jSDocLink
 
-instance EnumRep SyntaxKind JSDocLinkCode where
+instance EnumRep SyntaxKind JSDocLinkCode Int where
+  runtimeRep = unsafeCoerce jSDocLinkCode
   enumRep = jSDocLinkCode
 
-instance EnumRep SyntaxKind JSDocLinkPlain where
+instance EnumRep SyntaxKind JSDocLinkPlain Int where
+  runtimeRep = unsafeCoerce jSDocLinkPlain
   enumRep = jSDocLinkPlain
 
-instance EnumRep SyntaxKind JSDocTag where
+instance EnumRep SyntaxKind JSDocTag Int where
+  runtimeRep = unsafeCoerce jSDocTag
   enumRep = jSDocTag
 
-instance EnumRep SyntaxKind JSDocAugmentsTag where
+instance EnumRep SyntaxKind JSDocAugmentsTag Int where
+  runtimeRep = unsafeCoerce jSDocAugmentsTag
   enumRep = jSDocAugmentsTag
 
-instance EnumRep SyntaxKind JSDocImplementsTag where
+instance EnumRep SyntaxKind JSDocImplementsTag Int where
+  runtimeRep = unsafeCoerce jSDocImplementsTag
   enumRep = jSDocImplementsTag
 
-instance EnumRep SyntaxKind JSDocAuthorTag where
+instance EnumRep SyntaxKind JSDocAuthorTag Int where
+  runtimeRep = unsafeCoerce jSDocAuthorTag
   enumRep = jSDocAuthorTag
 
-instance EnumRep SyntaxKind JSDocDeprecatedTag where
+instance EnumRep SyntaxKind JSDocDeprecatedTag Int where
+  runtimeRep = unsafeCoerce jSDocDeprecatedTag
   enumRep = jSDocDeprecatedTag
 
-instance EnumRep SyntaxKind JSDocClassTag where
+instance EnumRep SyntaxKind JSDocClassTag Int where
+  runtimeRep = unsafeCoerce jSDocClassTag
   enumRep = jSDocClassTag
 
-instance EnumRep SyntaxKind JSDocPublicTag where
+instance EnumRep SyntaxKind JSDocPublicTag Int where
+  runtimeRep = unsafeCoerce jSDocPublicTag
   enumRep = jSDocPublicTag
 
-instance EnumRep SyntaxKind JSDocPrivateTag where
+instance EnumRep SyntaxKind JSDocPrivateTag Int where
+  runtimeRep = unsafeCoerce jSDocPrivateTag
   enumRep = jSDocPrivateTag
 
-instance EnumRep SyntaxKind JSDocProtectedTag where
+instance EnumRep SyntaxKind JSDocProtectedTag Int where
+  runtimeRep = unsafeCoerce jSDocProtectedTag
   enumRep = jSDocProtectedTag
 
-instance EnumRep SyntaxKind JSDocReadonlyTag where
+instance EnumRep SyntaxKind JSDocReadonlyTag Int where
+  runtimeRep = unsafeCoerce jSDocReadonlyTag
   enumRep = jSDocReadonlyTag
 
-instance EnumRep SyntaxKind JSDocOverrideTag where
+instance EnumRep SyntaxKind JSDocOverrideTag Int where
+  runtimeRep = unsafeCoerce jSDocOverrideTag
   enumRep = jSDocOverrideTag
 
-instance EnumRep SyntaxKind JSDocCallbackTag where
+instance EnumRep SyntaxKind JSDocCallbackTag Int where
+  runtimeRep = unsafeCoerce jSDocCallbackTag
   enumRep = jSDocCallbackTag
 
-instance EnumRep SyntaxKind JSDocEnumTag where
+instance EnumRep SyntaxKind JSDocEnumTag Int where
+  runtimeRep = unsafeCoerce jSDocEnumTag
   enumRep = jSDocEnumTag
 
-instance EnumRep SyntaxKind JSDocParameterTag where
+instance EnumRep SyntaxKind JSDocParameterTag Int where
+  runtimeRep = unsafeCoerce jSDocParameterTag
   enumRep = jSDocParameterTag
 
-instance EnumRep SyntaxKind JSDocReturnTag where
+instance EnumRep SyntaxKind JSDocReturnTag Int where
+  runtimeRep = unsafeCoerce jSDocReturnTag
   enumRep = jSDocReturnTag
 
-instance EnumRep SyntaxKind JSDocThisTag where
+instance EnumRep SyntaxKind JSDocThisTag Int where
+  runtimeRep = unsafeCoerce jSDocThisTag
   enumRep = jSDocThisTag
 
-instance EnumRep SyntaxKind JSDocTypeTag where
+instance EnumRep SyntaxKind JSDocTypeTag Int where
+  runtimeRep = unsafeCoerce jSDocTypeTag
   enumRep = jSDocTypeTag
 
-instance EnumRep SyntaxKind JSDocTemplateTag where
+instance EnumRep SyntaxKind JSDocTemplateTag Int where
+  runtimeRep = unsafeCoerce jSDocTemplateTag
   enumRep = jSDocTemplateTag
 
-instance EnumRep SyntaxKind JSDocTypedefTag where
+instance EnumRep SyntaxKind JSDocTypedefTag Int where
+  runtimeRep = unsafeCoerce jSDocTypedefTag
   enumRep = jSDocTypedefTag
 
-instance EnumRep SyntaxKind JSDocSeeTag where
+instance EnumRep SyntaxKind JSDocSeeTag Int where
+  runtimeRep = unsafeCoerce jSDocSeeTag
   enumRep = jSDocSeeTag
 
-instance EnumRep SyntaxKind JSDocPropertyTag where
+instance EnumRep SyntaxKind JSDocPropertyTag Int where
+  runtimeRep = unsafeCoerce jSDocPropertyTag
   enumRep = jSDocPropertyTag
 
-instance EnumRep SyntaxKind SyntaxList where
+instance EnumRep SyntaxKind SyntaxList Int where
+  runtimeRep = unsafeCoerce syntaxList
   enumRep = syntaxList
 
-instance EnumRep SyntaxKind NotEmittedStatement where
+instance EnumRep SyntaxKind NotEmittedStatement Int where
+  runtimeRep = unsafeCoerce notEmittedStatement
   enumRep = notEmittedStatement
 
-instance EnumRep SyntaxKind PartiallyEmittedExpression where
+instance EnumRep SyntaxKind PartiallyEmittedExpression Int where
+  runtimeRep = unsafeCoerce partiallyEmittedExpression
   enumRep = partiallyEmittedExpression
 
-instance EnumRep SyntaxKind CommaListExpression where
+instance EnumRep SyntaxKind CommaListExpression Int where
+  runtimeRep = unsafeCoerce commaListExpression
   enumRep = commaListExpression
 
-instance EnumRep SyntaxKind MergeDeclarationMarker where
+instance EnumRep SyntaxKind MergeDeclarationMarker Int where
+  runtimeRep = unsafeCoerce mergeDeclarationMarker
   enumRep = mergeDeclarationMarker
 
-instance EnumRep SyntaxKind EndOfDeclarationMarker where
+instance EnumRep SyntaxKind EndOfDeclarationMarker Int where
+  runtimeRep = unsafeCoerce endOfDeclarationMarker
   enumRep = endOfDeclarationMarker
 
-instance EnumRep SyntaxKind SyntheticReferenceExpression where
+instance EnumRep SyntaxKind SyntheticReferenceExpression Int where
+  runtimeRep = unsafeCoerce syntheticReferenceExpression
   enumRep = syntheticReferenceExpression
 
-instance EnumRep SyntaxKind Count where
+instance EnumRep SyntaxKind Count Int where
+  runtimeRep = unsafeCoerce count
   enumRep = count
 
-instance EnumRep SyntaxKind FirstAssignment where
+instance EnumRep SyntaxKind FirstAssignment Int where
+  runtimeRep = unsafeCoerce firstAssignment
   enumRep = firstAssignment
 
-instance EnumRep SyntaxKind LastAssignment where
+instance EnumRep SyntaxKind LastAssignment Int where
+  runtimeRep = unsafeCoerce lastAssignment
   enumRep = lastAssignment
 
-instance EnumRep SyntaxKind FirstCompoundAssignment where
+instance EnumRep SyntaxKind FirstCompoundAssignment Int where
+  runtimeRep = unsafeCoerce firstCompoundAssignment
   enumRep = firstCompoundAssignment
 
-instance EnumRep SyntaxKind LastCompoundAssignment where
+instance EnumRep SyntaxKind LastCompoundAssignment Int where
+  runtimeRep = unsafeCoerce lastCompoundAssignment
   enumRep = lastCompoundAssignment
 
-instance EnumRep SyntaxKind FirstReservedWord where
+instance EnumRep SyntaxKind FirstReservedWord Int where
+  runtimeRep = unsafeCoerce firstReservedWord
   enumRep = firstReservedWord
 
-instance EnumRep SyntaxKind LastReservedWord where
+instance EnumRep SyntaxKind LastReservedWord Int where
+  runtimeRep = unsafeCoerce lastReservedWord
   enumRep = lastReservedWord
 
-instance EnumRep SyntaxKind FirstKeyword where
+instance EnumRep SyntaxKind FirstKeyword Int where
+  runtimeRep = unsafeCoerce firstKeyword
   enumRep = firstKeyword
 
-instance EnumRep SyntaxKind LastKeyword where
+instance EnumRep SyntaxKind LastKeyword Int where
+  runtimeRep = unsafeCoerce lastKeyword
   enumRep = lastKeyword
 
-instance EnumRep SyntaxKind FirstFutureReservedWord where
+instance EnumRep SyntaxKind FirstFutureReservedWord Int where
+  runtimeRep = unsafeCoerce firstFutureReservedWord
   enumRep = firstFutureReservedWord
 
-instance EnumRep SyntaxKind LastFutureReservedWord where
+instance EnumRep SyntaxKind LastFutureReservedWord Int where
+  runtimeRep = unsafeCoerce lastFutureReservedWord
   enumRep = lastFutureReservedWord
 
-instance EnumRep SyntaxKind FirstTypeNode where
+instance EnumRep SyntaxKind FirstTypeNode Int where
+  runtimeRep = unsafeCoerce firstTypeNode
   enumRep = firstTypeNode
 
-instance EnumRep SyntaxKind LastTypeNode where
+instance EnumRep SyntaxKind LastTypeNode Int where
+  runtimeRep = unsafeCoerce lastTypeNode
   enumRep = lastTypeNode
 
-instance EnumRep SyntaxKind FirstPunctuation where
+instance EnumRep SyntaxKind FirstPunctuation Int where
+  runtimeRep = unsafeCoerce firstPunctuation
   enumRep = firstPunctuation
 
-instance EnumRep SyntaxKind LastPunctuation where
+instance EnumRep SyntaxKind LastPunctuation Int where
+  runtimeRep = unsafeCoerce lastPunctuation
   enumRep = lastPunctuation
 
-instance EnumRep SyntaxKind FirstToken where
+instance EnumRep SyntaxKind FirstToken Int where
+  runtimeRep = unsafeCoerce firstToken
   enumRep = firstToken
 
-instance EnumRep SyntaxKind LastToken where
+instance EnumRep SyntaxKind LastToken Int where
+  runtimeRep = unsafeCoerce lastToken
   enumRep = lastToken
 
-instance EnumRep SyntaxKind FirstTriviaToken where
+instance EnumRep SyntaxKind FirstTriviaToken Int where
+  runtimeRep = unsafeCoerce firstTriviaToken
   enumRep = firstTriviaToken
 
-instance EnumRep SyntaxKind LastTriviaToken where
+instance EnumRep SyntaxKind LastTriviaToken Int where
+  runtimeRep = unsafeCoerce lastTriviaToken
   enumRep = lastTriviaToken
 
-instance EnumRep SyntaxKind FirstLiteralToken where
+instance EnumRep SyntaxKind FirstLiteralToken Int where
+  runtimeRep = unsafeCoerce firstLiteralToken
   enumRep = firstLiteralToken
 
-instance EnumRep SyntaxKind LastLiteralToken where
+instance EnumRep SyntaxKind LastLiteralToken Int where
+  runtimeRep = unsafeCoerce lastLiteralToken
   enumRep = lastLiteralToken
 
-instance EnumRep SyntaxKind FirstTemplateToken where
+instance EnumRep SyntaxKind FirstTemplateToken Int where
+  runtimeRep = unsafeCoerce firstTemplateToken
   enumRep = firstTemplateToken
 
-instance EnumRep SyntaxKind LastTemplateToken where
+instance EnumRep SyntaxKind LastTemplateToken Int where
+  runtimeRep = unsafeCoerce lastTemplateToken
   enumRep = lastTemplateToken
 
-instance EnumRep SyntaxKind FirstBinaryOperator where
+instance EnumRep SyntaxKind FirstBinaryOperator Int where
+  runtimeRep = unsafeCoerce firstBinaryOperator
   enumRep = firstBinaryOperator
 
-instance EnumRep SyntaxKind LastBinaryOperator where
+instance EnumRep SyntaxKind LastBinaryOperator Int where
+  runtimeRep = unsafeCoerce lastBinaryOperator
   enumRep = lastBinaryOperator
 
-instance EnumRep SyntaxKind FirstStatement where
+instance EnumRep SyntaxKind FirstStatement Int where
+  runtimeRep = unsafeCoerce firstStatement
   enumRep = firstStatement
 
-instance EnumRep SyntaxKind LastStatement where
+instance EnumRep SyntaxKind LastStatement Int where
+  runtimeRep = unsafeCoerce lastStatement
   enumRep = lastStatement
 
-instance EnumRep SyntaxKind FirstNode where
+instance EnumRep SyntaxKind FirstNode Int where
+  runtimeRep = unsafeCoerce firstNode
   enumRep = firstNode
 
-instance EnumRep SyntaxKind FirstJSDocNode where
+instance EnumRep SyntaxKind FirstJSDocNode Int where
+  runtimeRep = unsafeCoerce firstJSDocNode
   enumRep = firstJSDocNode
 
-instance EnumRep SyntaxKind LastJSDocNode where
+instance EnumRep SyntaxKind LastJSDocNode Int where
+  runtimeRep = unsafeCoerce lastJSDocNode
   enumRep = lastJSDocNode
 
-instance EnumRep SyntaxKind FirstJSDocTagNode where
+instance EnumRep SyntaxKind FirstJSDocTagNode Int where
+  runtimeRep = unsafeCoerce firstJSDocTagNode
   enumRep = firstJSDocTagNode
 
-instance EnumRep SyntaxKind LastJSDocTagNode where
+instance EnumRep SyntaxKind LastJSDocTagNode Int where
+  runtimeRep = unsafeCoerce lastJSDocTagNode
   enumRep = lastJSDocTagNode
