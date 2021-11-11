@@ -38,7 +38,7 @@ parseTypeNode n@{ kind } =
           parseTypeLiteralNode tn = TS.isTypeLiteralNode tn <#> \tln -> typeRecord (toMembers tln.members) Nothing
             where 
               toMembers :: Array TS.TypeNode -> Array (Tuple String (CST.Type e))
-              toMembers tn = tn <#> parseMember >>= Unfoldable.fromMaybe
+              toMembers tnInner = tnInner <#> parseMember >>= Unfoldable.fromMaybe
         
           parseTypeReference :: { | TS.TypeNodeR + n } -> Maybe (CST.Type e)
           parseTypeReference tn = TS.isTypeReferenceNode tn <#> \ref -> typeCtor ref.typeName.text
