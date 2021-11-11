@@ -5,9 +5,9 @@ import Prelude
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toMaybe)
 import Effect (Effect)
-import Type.Data.List (type (:>), Nil')
 import Type.Proxy (Proxy)
 import Typescript.SyntaxKind as SK
+import Untagged.Union (type (|+|))
 
 foreign import data SourceFile :: Type
 
@@ -61,12 +61,12 @@ type NodeR r = (| r)
 type Node
   = { | NodeR () }
 
-type TypeNodeR r = (kind :: Proxy SK.SyntaxKindTList | r)
+type TypeNodeR r = (kind :: SK.SyntaxKindEnum | r)
 type TypeNode
   = { | TypeNodeR () }
 
 type KeywordSyntaxKind
-  = SK.StringKeyword :> SK.NumberKeyword :> Nil'
+  = SK.SyntaxKind SK.StringKeyword |+| SK.SyntaxKind SK.NumberKeyword
 
 type PropertyName
   = Identifier
@@ -77,14 +77,14 @@ type TypeElement =
 
 type PropertySignature
   =
-  { kind :: Proxy (SK.PropertySignature :> Nil')
+  { kind :: SK.SyntaxKind SK.PropertySignature
   , name :: PropertyName
   , "type" :: Nullable TypeNode
   }
 
 type TypeAliasDeclaration
   =
-  { "kind" :: Proxy (SK.TypeAliasDeclaration :> Nil')
+  { "kind" :: SK.SyntaxKind SK.TypeAliasDeclaration
   , name :: Identifier
   , "type" :: TypeNode
   }
@@ -95,19 +95,19 @@ type KeywordToken =
 
 type TypeLiteralNode
   =
-  { "kind" :: Proxy (SK.TypeLiteral :> Nil')
+  { "kind" :: SK.SyntaxKind SK.TypeLiteral
   , members :: Array TypeNode
   }
 
 type ParameterDeclaration =
-  { kind :: Proxy (SK.Parameter :> Nil')
+  { kind :: SK.SyntaxKind SK.Parameter
   , name :: Identifier
   , type :: Nullable TypeNode
   }
 
 type FunctionDeclaration
   =
-  { kind :: Proxy (SK.FunctionDeclaration :> Nil')
+  { kind :: SK.SyntaxKind SK.FunctionDeclaration
   , name :: Nullable Identifier
   , parameters :: Array ParameterDeclaration
   , type :: Nullable TypeNode
@@ -117,6 +117,6 @@ type EntityName = Identifier
 
 type TypeReferenceNode
   =
-  { kind :: Proxy (SK.TypeReference :> Nil')
+  { kind :: SK.SyntaxKind SK.TypeReference
   , typeName :: EntityName
   }
