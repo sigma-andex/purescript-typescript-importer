@@ -3,11 +3,14 @@ module GenCode where
 import Prelude
 
 import Control.Monad.Writer (tell)
+import Data.Array (splitAt)
 import Data.Maybe (Maybe(..))
 import Data.Nullable (toMaybe)
+import Data.String (Pattern(..), split)
 import Data.Traversable (traverse, sequence)
 import Data.Tuple (Tuple(..))
 import Data.Unfoldable as Unfoldable
+import Debug (spy)
 import Effect (Effect)
 import Partial.Unsafe (unsafePartial)
 import PureScript.CST.Types as CST
@@ -76,12 +79,14 @@ parseNode n = case TS.isTypeAliasDeclaration n of
 genCode :: Array String -> Effect (Array String)
 genCode fileNames = do
   program <- TS.createProgram fileNames
-  sourceFiles <- traverse (TS.getSourceFile program) fileNames
+  sourceFiles <- traverse (\fn -> TS.getSourceFile program fn <#> \sf -> Tuple fn sf ) fileNames 
 
   traverse generateOne (sourceFiles)
   where
-  generateOne sf = do
+  generateOne (Tuple fn sf) = do
     let
+      _ = spy "Filename" fn
+      --moduleName = split (Pattern "(\\|/)") fn # last 
       generatedModule = unsafePartial $ codegenModule "Person" do -- [TODO] Get real pascal name
         let declarations = TS.getSourceFileChildren sf >>= TS.getChildren <#> parseNode >>= Unfoldable.fromMaybe
         tell declarations
