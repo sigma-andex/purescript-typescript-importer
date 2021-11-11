@@ -26,6 +26,8 @@ exports.isTypeLiteralNodeImpl = (node) =>
 exports.isPropertySignatureImpl = (node) =>
     ts.isPropertySignature(node) ? node : null
 
+exports.isFunctionDeclarationImpl = (node) =>
+    ts.isFunctionDeclaration(node) ? node : null
 
-exports.numberKeyword = ts.SyntaxKind.NumberKeyword
-exports.stringKeyword = ts.SyntaxKind.StringKeyword
+exports.isTypeReferenceNodeImpl = (node) =>
+    ts.isTypeReferenceNode(node) ? node : null

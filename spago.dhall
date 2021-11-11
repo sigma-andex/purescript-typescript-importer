@@ -27,9 +27,11 @@
   , "tidy-codegen"
   , "transformers"
   , "tuples"
+  , "typelevel-lists"
   , "typelevel-prelude"
   , "typescript-utils"
   , "unfoldable"
+  , "unsafe-coerce"
   , "untagged-union"
   , "uuid"
   ]
