@@ -28,5 +28,5 @@ jobs:
             .spago
             output
       - run: spago build
-
+      - run: npm install
       - run: spago test
