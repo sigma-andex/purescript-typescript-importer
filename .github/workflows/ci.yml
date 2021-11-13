@@ -29,4 +29,4 @@ jobs:
             output
       - run: spago build
 
-      - run: spago test --no-install
+      - run: spago test
