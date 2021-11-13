@@ -102,5 +102,19 @@ let upstream =
       , version =
           "v1.1.1"
       }
-    with typescript-utils = ../purescript-typescript-utils/spago.dhall as Location
+      with typescript-utils =
+      { dependencies =
+          [ "console"
+          , "effect"
+          , "functions"
+          , "prelude"
+          , "psci-support"
+          , "typelevel-lists"
+          , "unsafe-coerce"
+          ]
+      , repo =
+          "https://github.com/sigma-andex/purescript-typescript-utils.git"
+      , version =
+          "main"
+      }
 in  upstream
