@@ -1,3 +1,6 @@
-const P = require("person")
+"use strict";
 
-exports.getAge = P.getAge
+const Person = require("person");
+
+exports.getAge = Person.getAge;
+

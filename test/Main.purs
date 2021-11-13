@@ -5,7 +5,7 @@ import Prelude
 import Data.Array (zip)
 import Data.Foldable (for_)
 import Data.String.Extra (pascalCase)
-import Data.Tuple (Tuple(..))
+import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
@@ -36,8 +36,13 @@ testDir expected fullDirName =
     fullFileNames ← readdir (original <> fullDirName)
     actuals <- liftEffect $ genCode (map (\f -> original <> fullDirName <> "/" <> f) fullFileNames)
     for_ (zip fullFileNames actuals) \(Tuple fileName actual) -> do
-      let psFileName = pascalCase (basenameWithoutExt fileName "ts") <> ".purs"
-      Actual actual `shouldBeGolden` GoldenFile (expected <> dirName <> "/" <> psFileName)
+      let 
+        goldenFileName = pascalCase (basenameWithoutExt fileName "ts")
+        psFileName = goldenFileName <> ".purs"
+        jsFileName = goldenFileName <> ".js"
+
+      Actual (fst actual) `shouldBeGolden` GoldenFile (expected <> dirName <> "/" <> psFileName)
+      Actual (snd actual) `shouldBeGolden` GoldenFile (expected <> dirName <> "/" <> jsFileName)
   where
   dirName = basename fullDirName
 
