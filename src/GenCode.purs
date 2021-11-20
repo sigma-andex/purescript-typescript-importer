@@ -2,15 +2,13 @@ module GenCode where
 
 import Prelude
 
-import Control.Alternative (empty)
 import Control.Monad.Writer (tell)
 import Data.Array (foldl, length, singleton)
-import Data.Map (toUnfoldable, SemigroupMap)
 import Data.Maybe (Maybe(..))
-import Data.Newtype (class Newtype, unwrap)
+import Data.Newtype (class Newtype)
 import Data.Nullable (toMaybe)
 import Data.Traversable (traverse, sequence)
-import Data.Tuple (Tuple(..), fst, snd)
+import Data.Tuple (Tuple(..))
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Unfoldable as Unfoldable
 import Debug (spy)
@@ -18,11 +16,10 @@ import Effect (Effect)
 import FFI.ESTree as ES
 import Partial.Unsafe (unsafePartial)
 import PureScript.CST.Types as CST
-import Tidy.Codegen (declForeign, declImport, declSignature, declType, declTypeSignature, declValue, exprApp, exprIdent, printModule, typeApp, typeArrow, typeCtor, typeRecord)
-import Tidy.Codegen.Monad (CodegenT(..), Codegen, codegenModule, importFrom, importType, importValue)
+import Tidy.Codegen (declForeign, declSignature, declType, declValue, exprApp, exprIdent, printModule, typeApp, typeArrow, typeCtor, typeRecord)
+import Tidy.Codegen.Monad (CodegenT, codegenModule, importFrom, importType, importValue)
 import Type.Row (type (+))
 import Typescript.Parser as TS
-import Typescript.SyntaxKind (functionDeclaration)
 import Typescript.SyntaxKind as SK
 import Typescript.Utils.Enum (default', on')
 
@@ -109,7 +106,7 @@ parseNode (ModuleName moduleName) codegen n = case TS.isTypeAliasDeclaration n o
                       tell
                         [ uncurriedFn
                         , declSignature name.text (typeArrow members tpe)
-                        , declValue name.text [] (exprApp (exprIdent $ "runFn" <> show paramNumber) [ exprIdent uncurriedName ])
+                        , declValue name.text [] (exprApp (exprIdent runFn) [ exprIdent uncurriedName ])
                         ]
                   in
                     { es, ps: codegen >>= const ps }
