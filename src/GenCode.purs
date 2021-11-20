@@ -2,9 +2,12 @@ module GenCode where
 
 import Prelude
 
+import Control.Alternative (empty)
 import Control.Monad.Writer (tell)
+import Data.Array (foldl, length, singleton)
+import Data.Map (toUnfoldable, SemigroupMap)
 import Data.Maybe (Maybe(..))
-import Data.Newtype (class Newtype)
+import Data.Newtype (class Newtype, unwrap)
 import Data.Nullable (toMaybe)
 import Data.Traversable (traverse, sequence)
 import Data.Tuple (Tuple(..), fst, snd)
@@ -15,10 +18,11 @@ import Effect (Effect)
 import FFI.ESTree as ES
 import Partial.Unsafe (unsafePartial)
 import PureScript.CST.Types as CST
-import Tidy.Codegen (declForeign, declType, printModule, typeArrow, typeCtor, typeRecord)
-import Tidy.Codegen.Monad (codegenModule)
+import Tidy.Codegen (declForeign, declImport, declSignature, declType, declTypeSignature, declValue, exprApp, exprIdent, printModule, typeApp, typeArrow, typeCtor, typeRecord)
+import Tidy.Codegen.Monad (CodegenT(..), Codegen, codegenModule, importFrom, importType, importValue)
 import Type.Row (type (+))
 import Typescript.Parser as TS
+import Typescript.SyntaxKind (functionDeclaration)
 import Typescript.SyntaxKind as SK
 import Typescript.Utils.Enum (default', on')
 
@@ -26,6 +30,7 @@ constJust :: forall a b. a -> b -> Maybe a
 constJust = Just >>> const
 
 newtype ModuleName = ModuleName String
+
 instance Newtype ModuleName String
 
 parseTypeNode :: ∀ n e. Partial => { | TS.TypeNodeR + n } -> Maybe (CST.Type e)
@@ -59,35 +64,59 @@ parseTypeNode n@{ kind } =
   in
     caseFn kind
 
-parseNode :: ∀ n e. Partial => ModuleName -> { | TS.NodeR + n } -> Maybe (CST.Declaration e ) /\ Maybe (ES.ESNode)
-parseNode (ModuleName moduleName) n = case TS.isTypeAliasDeclaration n of
-  Just tad -> 
-    let
-      psDeclaration = do
-        tpe <- parseTypeNode tad."type"
-        pure $ declType tad.name.text [] tpe 
-    in psDeclaration /\ Nothing
-  Nothing -> 
-    let
-      psDeclaration = do
-        fd <- TS.isFunctionDeclaration n
-        name <- toMaybe fd.name
-        tpe <- toMaybe fd."type" >>= parseTypeNode
+parseNode :: ∀ n e m. Monad m => Partial => ModuleName -> CodegenT e m Unit -> { | TS.NodeR + n } -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
+parseNode (ModuleName moduleName) codegen n = case TS.isTypeAliasDeclaration n of
+  Just tad ->
+    case parseTypeNode tad."type" of
+      Just tpe -> { es: [], ps: codegen >>= const (tell [ declType tad.name.text [] tpe ]) }
+      Nothing -> { es: [], ps: codegen }
+  Nothing ->
+    case TS.isFunctionDeclaration n of
+      Nothing -> { es: [], ps: codegen }
+      Just fd ->
         let
-          params :: Array (Maybe TS.TypeNode)
-          params = fd.parameters <#> (_."type" >>> toMaybe)
-        members <- sequence $ params <#> (\mp -> mp >>= parseTypeNode)
-        let
-          fn = declForeign name.text
-            ( typeArrow
-                members
-                tpe
-            )
-        Just { ps: fn, name: name.text } 
-      
-      jsDeclaration = psDeclaration <#> \{ name } -> ES.parse $ "exports." <> name <> " = " <> moduleName <> "." <> name <> ";"
+          maybeFnInfo = do
+            name <- toMaybe fd.name
+            tpe <- toMaybe fd."type" >>= parseTypeNode
+            let
+              params :: Array (Maybe TS.TypeNode)
+              params = fd.parameters <#> (_."type" >>> toMaybe)
+            members <- sequence $ params <#> (\mp -> mp >>= parseTypeNode)
+            pure { name, members, tpe }
 
-    in (psDeclaration <#> _.ps) /\ jsDeclaration
+          result = case maybeFnInfo of
+            Just { name, members, tpe } ->
+              case length members of
+                0 -> { es: [], ps: codegen } -- [TODO]: deal with effects
+                1 ->
+                  let
+                    es = singleton $ ES.parse $ "exports." <> name.text <> " = " <> moduleName <> "." <> name.text <> ";"
+                    ps = tell $ singleton $ declForeign name.text (typeArrow members tpe)
+                  in
+                    { es, ps: codegen >>= const ps }
+                paramNumber | paramNumber > 0 && paramNumber <= 10 ->
+                  let
+                    es = singleton $ ES.parse $ "exports." <> (name.text <> "Impl") <> " = " <> moduleName <> "." <> name.text <> ";"
+                    ps = do
+                      uncurriedTpe <- importFrom "Data.Function.Uncurried" (importType $ "Fn" <> show paramNumber)
+                      runFn <- importFrom "Data.Function.Uncurried" (importValue $ "runFn" <> show paramNumber)
+                      let
+                        uncurriedName = (name.text <> "Impl")
+                        uncurriedFn = declForeign uncurriedName
+                          ( typeApp (typeCtor uncurriedTpe)
+                              (members <> [ tpe ])
+                          )
+                      tell
+                        [ uncurriedFn
+                        , declSignature name.text (typeArrow members tpe)
+                        , declValue name.text [] (exprApp (exprIdent $ "runFn" <> show paramNumber) [ exprIdent uncurriedName ])
+                        ]
+                  in
+                    { es, ps: codegen >>= const ps }
+                _ -> { es: [], ps: codegen }
+            Nothing -> { es: [], ps: codegen }
+        in
+          result
 
 genCode :: Array String -> Effect (Array (String /\ String))
 genCode fileNames = do
@@ -101,15 +130,18 @@ genCode fileNames = do
       _ = spy "Filename" fn
       moduleName = "Person"
       nodeModuleName = "person"
-      
-      declarations = TS.getSourceFileChildren sf >>= TS.getChildren <#> parseNode (ModuleName moduleName)
-      psDeclarations = declarations <#> fst >>= Unfoldable.fromMaybe
-      jsDeclarations = declarations <#> snd >>= Unfoldable.fromMaybe
 
-      generatedPsModule = codegenModule "Person" do -- [TODO] Get real pascal name
-        tell psDeclarations
-      generatedJsModule = ES.mkProgram $ [
-        ES.parse "\"use strict\";",
-        ES.parse $ "const " <> moduleName <> " = require(\"" <> nodeModuleName <> "\")"
-      ] <> jsDeclarations
+      acc { es: esInput, ps: psInput } node =
+        let
+          { es: esOutput, ps: psOutput } = parseNode (ModuleName moduleName) psInput node
+        in
+          { es: esInput <> esOutput, ps: psOutput }
+
+      declarations = TS.getSourceFileChildren sf >>= TS.getChildren # foldl acc { es: [], ps: pure unit }
+
+      generatedPsModule = codegenModule "Person" declarations.ps
+      generatedJsModule = ES.mkProgram $
+        [ ES.parse "\"use strict\";"
+        , ES.parse $ "const " <> moduleName <> " = require(\"" <> nodeModuleName <> "\")"
+        ] <> (declarations.es)
     pure $ printModule generatedPsModule /\ (ES.generate generatedJsModule)
