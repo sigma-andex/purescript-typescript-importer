@@ -119,14 +119,19 @@ parseNode moduleName codegen n@{ kind } =
 
     getOrEmpty = maybe empty identity
 
-    handleTypeAliasDeclaration = TS.isTypeAliasDeclaration n <#> parseTypeAliasDeclaration moduleName codegen # getOrEmpty
-    handleFunctionDeclaration = TS.isFunctionDeclaration n <#> parseFunctionDeclaration moduleName codegen # getOrEmpty
+    mkHandler
+      :: forall t enum
+       . ({ | TS.NodeR + n } -> Maybe t)
+      -> (ModuleName -> CodegenT e m Unit -> t -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit })
+      -> enum
+      -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
+    mkHandler isOfType parseType = const $ isOfType n <#> parseType moduleName codegen # getOrEmpty
 
     caseFn :: SK.SyntaxKindEnum -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
     caseFn =
       default' empty
-        # on' SK.typeAliasDeclaration (const handleTypeAliasDeclaration)
-        # on' SK.functionDeclaration (const handleFunctionDeclaration)
+        # on' SK.typeAliasDeclaration (mkHandler TS.isTypeAliasDeclaration parseTypeAliasDeclaration)
+        # on' SK.functionDeclaration (mkHandler TS.isFunctionDeclaration parseFunctionDeclaration)
   in
     caseFn kind
 
