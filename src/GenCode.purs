@@ -4,7 +4,7 @@ import Prelude
 
 import Control.Monad.Writer (tell)
 import Data.Array (foldl, length, singleton)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), maybe)
 import Data.Newtype (class Newtype)
 import Data.Nullable (toMaybe)
 import Data.Traversable (traverse, sequence)
@@ -61,59 +61,74 @@ parseTypeNode n@{ kind } =
   in
     caseFn kind
 
-parseNode :: ∀ n e m. Monad m => Partial => ModuleName -> CodegenT e m Unit -> { | TS.NodeR + n } -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
-parseNode (ModuleName moduleName) codegen n = case TS.isTypeAliasDeclaration n of
-  Just tad ->
-    case parseTypeNode tad."type" of
-      Just tpe -> { es: [], ps: codegen >>= const (tell [ declType tad.name.text [] tpe ]) }
-      Nothing -> { es: [], ps: codegen }
-  Nothing ->
-    case TS.isFunctionDeclaration n of
-      Nothing -> { es: [], ps: codegen }
-      Just fd ->
-        let
-          maybeFnInfo = do
-            name <- toMaybe fd.name
-            tpe <- toMaybe fd."type" >>= parseTypeNode
-            let
-              params :: Array (Maybe TS.TypeNode)
-              params = fd.parameters <#> (_."type" >>> toMaybe)
-            members <- sequence $ params <#> (\mp -> mp >>= parseTypeNode)
-            pure { name, members, tpe }
+parseTypeAliasDeclaration :: ∀ e m. Monad m => Partial => ModuleName -> CodegenT e m Unit -> TS.TypeAliasDeclaration -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
+parseTypeAliasDeclaration (ModuleName moduleName) codegen tad = case parseTypeNode tad."type" of
+  Just tpe -> { es: [], ps: codegen >>= const (tell [ declType tad.name.text [] tpe ]) }
+  Nothing -> { es: [], ps: codegen }
 
-          result = case maybeFnInfo of
-            Just { name, members, tpe } ->
-              case length members of
-                0 -> { es: [], ps: codegen } -- [TODO]: deal with effects
-                1 ->
-                  let
-                    es = singleton $ ES.parse $ "exports." <> name.text <> " = " <> moduleName <> "." <> name.text <> ";"
-                    ps = tell $ singleton $ declForeign name.text (typeArrow members tpe)
-                  in
-                    { es, ps: codegen >>= const ps }
-                paramNumber | paramNumber > 0 && paramNumber <= 10 ->
-                  let
-                    es = singleton $ ES.parse $ "exports." <> (name.text <> "Impl") <> " = " <> moduleName <> "." <> name.text <> ";"
-                    ps = do
-                      uncurriedTpe <- importFrom "Data.Function.Uncurried" (importType $ "Fn" <> show paramNumber)
-                      runFn <- importFrom "Data.Function.Uncurried" (importValue $ "runFn" <> show paramNumber)
-                      let
-                        uncurriedName = (name.text <> "Impl")
-                        uncurriedFn = declForeign uncurriedName
-                          ( typeApp (typeCtor uncurriedTpe)
-                              (members <> [ tpe ])
-                          )
-                      tell
-                        [ uncurriedFn
-                        , declSignature name.text (typeArrow members tpe)
-                        , declValue name.text [] (exprApp (exprIdent runFn) [ exprIdent uncurriedName ])
-                        ]
-                  in
-                    { es, ps: codegen >>= const ps }
-                _ -> { es: [], ps: codegen }
-            Nothing -> { es: [], ps: codegen }
-        in
-          result
+parseFunctionDeclaration :: ∀ e m. Monad m => Partial => ModuleName -> CodegenT e m Unit -> TS.FunctionDeclaration -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
+parseFunctionDeclaration (ModuleName moduleName) codegen fd =
+  let
+    maybeFnInfo = do
+      name <- toMaybe fd.name
+      tpe <- toMaybe fd."type" >>= parseTypeNode
+      let
+        params :: Array (Maybe TS.TypeNode)
+        params = fd.parameters <#> (_."type" >>> toMaybe)
+      members <- sequence $ params <#> (\mp -> mp >>= parseTypeNode)
+      pure { name, members, tpe }
+
+    result = case maybeFnInfo of
+      Just { name, members, tpe } ->
+        case length members of
+          0 -> { es: [], ps: codegen } -- [TODO]: deal with effects
+          1 ->
+            let
+              es = singleton $ ES.parse $ "exports." <> name.text <> " = " <> moduleName <> "." <> name.text <> ";"
+              ps = tell $ singleton $ declForeign name.text (typeArrow members tpe)
+            in
+              { es, ps: codegen >>= const ps }
+          paramNumber | paramNumber > 0 && paramNumber <= 10 ->
+            let
+              es = singleton $ ES.parse $ "exports." <> (name.text <> "Impl") <> " = " <> moduleName <> "." <> name.text <> ";"
+              ps = do
+                uncurriedTpe <- importFrom "Data.Function.Uncurried" (importType $ "Fn" <> show paramNumber)
+                runFn <- importFrom "Data.Function.Uncurried" (importValue $ "runFn" <> show paramNumber)
+                let
+                  uncurriedName = (name.text <> "Impl")
+                  uncurriedFn = declForeign uncurriedName
+                    ( typeApp (typeCtor uncurriedTpe)
+                        (members <> [ tpe ])
+                    )
+                tell
+                  [ uncurriedFn
+                  , declSignature name.text (typeArrow members tpe)
+                  , declValue name.text [] (exprApp (exprIdent runFn) [ exprIdent uncurriedName ])
+                  ]
+            in
+              { es, ps: codegen >>= const ps }
+          _ -> { es: [], ps: codegen }
+      Nothing -> { es: [], ps: codegen }
+  in
+    result
+
+parseNode :: ∀ n e m. Monad m => Partial => ModuleName -> CodegenT e m Unit -> { | TS.NodeR + n } -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
+parseNode moduleName codegen n@{ kind } =
+  let
+    empty = { es: [], ps: codegen }
+
+    getOrEmpty = maybe empty identity
+
+    handleTypeAliasDeclaration = TS.isTypeAliasDeclaration n <#> parseTypeAliasDeclaration moduleName codegen # getOrEmpty
+    handleFunctionDeclaration = TS.isFunctionDeclaration n <#> parseFunctionDeclaration moduleName codegen # getOrEmpty
+
+    caseFn :: SK.SyntaxKindEnum -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
+    caseFn =
+      default' empty
+        # on' SK.typeAliasDeclaration (const handleTypeAliasDeclaration)
+        # on' SK.functionDeclaration (const handleFunctionDeclaration)
+  in
+    caseFn kind
 
 genCode :: Array String -> Effect (Array (String /\ String))
 genCode fileNames = do

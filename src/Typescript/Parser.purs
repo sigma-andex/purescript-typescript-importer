@@ -55,8 +55,7 @@ isTypeReferenceNode = isTypeReferenceNodeImpl >>> toMaybe
 type Identifier
   = { text :: String }
 
-type NodeR :: forall k. k -> k
-type NodeR r = (| r)
+type NodeR r = (kind :: SK.SyntaxKindEnum | r)
 
 type Node
   = { | NodeR () }
