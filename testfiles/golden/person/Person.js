@@ -6,3 +6,5 @@ exports.getAge = Person.getAge;
 
 exports.createPersonImpl = Person.createPerson;
 
+exports.johnDoe = Person.johnDoe;
+

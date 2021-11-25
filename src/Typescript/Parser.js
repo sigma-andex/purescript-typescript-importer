@@ -31,3 +31,6 @@ exports.isFunctionDeclarationImpl = (node) =>
 
 exports.isTypeReferenceNodeImpl = (node) =>
     ts.isTypeReferenceNode(node) ? node : null
+
+exports.isVariableStatementImpl = (node) =>
+    ts.isVariableStatement(node) ? node : null

@@ -52,6 +52,11 @@ foreign import isTypeReferenceNodeImpl :: forall r. { | NodeR r } -> Nullable Ty
 isTypeReferenceNode :: forall r. { | NodeR r } -> Maybe TypeReferenceNode
 isTypeReferenceNode = isTypeReferenceNodeImpl >>> toMaybe
 
+foreign import isVariableStatementImpl :: forall r. { | NodeR r } -> Nullable VariableStatement
+
+isVariableStatement :: forall r. { | NodeR r } -> Maybe VariableStatement
+isVariableStatement = isVariableStatementImpl >>> toMaybe
+
 type Identifier
   = { text :: String }
 
@@ -118,4 +123,22 @@ type TypeReferenceNode
   =
   { kind :: SK.SyntaxKind SK.TypeReference
   , typeName :: EntityName
+  }
+
+type VariableDeclaration
+  =
+  { name :: Identifier
+  , type :: Nullable TypeNode
+  }
+
+type VariableDeclarationList
+  =
+  { kind :: SK.SyntaxKind SK.VariableDeclarationList
+  , declarations :: Array VariableDeclaration
+  }
+
+type VariableStatement
+  =
+  { kind :: SK.SyntaxKind SK.VariableStatement
+  , declarationList :: VariableDeclarationList
   }
