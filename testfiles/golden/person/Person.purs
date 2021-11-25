@@ -9,3 +9,5 @@ foreign import createPersonImpl :: Fn2 String Number Person
 
 createPerson :: String -> Number -> Person
 createPerson = runFn2 createPersonImpl
+
+foreign import johnDoe :: Person

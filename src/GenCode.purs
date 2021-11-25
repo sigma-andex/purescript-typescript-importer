@@ -112,6 +112,30 @@ parseFunctionDeclaration (ModuleName moduleName) codegen fd =
   in
     result
 
+parseVariableDeclaration :: ∀ e m. Monad m => Partial => ModuleName -> CodegenT e m Unit -> TS.VariableDeclaration -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
+parseVariableDeclaration (ModuleName moduleName) codegen { name, "type": tpe } = case toMaybe tpe >>= parseTypeNode of
+  Just tpeNode ->
+    let
+      es = singleton $ ES.parse $ "exports." <> (name.text) <> " = " <> moduleName <> "." <> name.text <> ";"
+      ps = tell $ singleton $ declForeign name.text tpeNode
+    in
+      { es, ps: codegen >>= const ps }
+  Nothing ->
+    -- [TODO]: decide what we do if we don't have a type annotation
+    { es: [], ps: codegen }
+
+parseVariableStatement :: ∀ e m. Monad m => Partial => ModuleName -> CodegenT e m Unit -> TS.VariableStatement -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
+parseVariableStatement mn codegen vs =
+  let
+    acc { es: esInput, ps: psInput } vd =
+      let
+        { es: esOutput, ps: psOutput } = parseVariableDeclaration mn psInput vd
+      in
+        { es: esInput <> esOutput, ps: psOutput }
+    result = foldl acc { es: [], ps: codegen } vs.declarationList.declarations
+  in
+    result
+
 parseNode :: ∀ n e m. Monad m => Partial => ModuleName -> CodegenT e m Unit -> { | TS.NodeR + n } -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
 parseNode moduleName codegen n@{ kind } =
   let
@@ -132,6 +156,7 @@ parseNode moduleName codegen n@{ kind } =
       default' empty
         # on' SK.typeAliasDeclaration (mkHandler TS.isTypeAliasDeclaration parseTypeAliasDeclaration)
         # on' SK.functionDeclaration (mkHandler TS.isFunctionDeclaration parseFunctionDeclaration)
+        # on' SK.variableStatement (mkHandler TS.isVariableStatement parseVariableStatement)
   in
     caseFn kind
 
