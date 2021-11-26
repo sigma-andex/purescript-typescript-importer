@@ -2,7 +2,7 @@
 
 Experiment of writing a typescript importer for purescript. Very early stage and ongoing development, don't use it yet!
 
-The current state of typescript support can be seen in the testfiles folder. In `testfiles/original` are the typescript input files and in `testfiles/golden` the expected output of the typescript support that is currently passing.
+The current state of typescript support can be seen in the testfiles folder. In [`testfiles/original`](./testfiles/original/) are the typescript input files and in [`testfiles/golden`](./testfiles/golden/) the expected output of the typescript support that is currently passing.
 
 ## Goals & non-goals
 
