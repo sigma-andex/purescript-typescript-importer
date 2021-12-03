@@ -19,7 +19,6 @@ export function createPersonWithName(name: string, age?: number): Person {
     return { name: name, age: age ? age : 30 }
 }
 
-// mark's challenge
 type NullablePerson = {
     name?: string,
     age?: number
