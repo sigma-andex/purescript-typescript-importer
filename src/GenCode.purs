@@ -4,10 +4,11 @@ import Prelude
 
 import Control.Monad.Writer (tell)
 import Data.Array (foldl, length, singleton)
-import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe (Maybe(..), isJust, maybe)
 import Data.Newtype (class Newtype)
-import Data.Nullable (toMaybe)
-import Data.Traversable (traverse, sequence)
+import Data.Nullable (Nullable, toMaybe)
+import Data.String (trim)
+import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Unfoldable as Unfoldable
@@ -16,7 +17,7 @@ import Effect (Effect)
 import FFI.ESTree as ES
 import Partial.Unsafe (unsafePartial)
 import PureScript.CST.Types as CST
-import Tidy.Codegen (declForeign, declSignature, declType, declValue, exprApp, exprIdent, printModule, typeApp, typeArrow, typeCtor, typeRecord)
+import Tidy.Codegen (binderVar, declForeign, declSignature, declType, declValue, exprApp, exprIdent, printModule, typeApp, typeArrow, typeCtor, typeRecord)
 import Tidy.Codegen.Monad (CodegenT, codegenModule, importFrom, importType, importValue)
 import Type.Row (type (+))
 import Typescript.Parser as TS
@@ -66,6 +67,12 @@ parseTypeAliasDeclaration (ModuleName moduleName) codegen tad = case parseTypeNo
   Just tpe -> { es: [], ps: codegen >>= const (tell [ declType tad.name.text [] tpe ]) }
   Nothing -> { es: [], ps: codegen }
 
+type Parameter e = 
+   { name :: String
+   , isNullable :: Boolean
+   , tpe :: CST.Type e 
+   } 
+
 parseFunctionDeclaration :: ∀ e m. Monad m => Partial => ModuleName -> CodegenT e m Unit -> TS.FunctionDeclaration -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
 parseFunctionDeclaration (ModuleName moduleName) codegen fd =
   let
@@ -73,19 +80,37 @@ parseFunctionDeclaration (ModuleName moduleName) codegen fd =
       name <- toMaybe fd.name
       tpe <- toMaybe fd."type" >>= parseTypeNode
       let
-        params :: Array (Maybe TS.TypeNode)
-        params = fd.parameters <#> (_."type" >>> toMaybe)
-      members <- sequence $ params <#> (\mp -> mp >>= parseTypeNode)
-      pure { name, members, tpe }
+
+        parseParam :: TS.ParameterDeclaration -> Maybe (Parameter e)
+        parseParam { questionToken, "type": paramTpe, name } = 
+          toMaybe paramTpe >>= parseTypeNode <#> { isNullable: isJust $ toMaybe questionToken, name: name.text, tpe: _ }
+        -- case toMaybe questionToken of
+        --   Just qt -> typeApp (typeCtor "Data.Nullable") [ typeCtor "Int" ] ?h
+        --   Nothing -> toMaybe paramTpe >>= parseTypeNode
+        
+        params :: Array (Maybe (Parameter e) )
+        params = fd.parameters <#> parseParam 
+
+        -- parseParam mp = mp >>= parseTypeNode
+        nullableMembers :: Array (Parameter e)
+        nullableMembers = params >>= Unfoldable.fromMaybe -- <#> parseParam
+      pure { name, nullableMembers, tpe }
 
     result = case maybeFnInfo of
-      Just { name, members, tpe } ->
-        case length members of
+      Just { name, nullableMembers, tpe } ->
+        let 
+          handleNullables nm nullableTpe = 
+            let withNullable t = typeApp (typeCtor nullableTpe) [ t ]
+            in nm <#> \{ isNullable, tpe: t } -> if isNullable then withNullable t else t
+        in 
+        case length nullableMembers of
           0 -> { es: [], ps: codegen } -- [TODO]: deal with effects
           1 ->
             let
               es = singleton $ ES.parse $ "exports." <> name.text <> " = " <> moduleName <> "." <> name.text <> ";"
-              ps = tell $ singleton $ declForeign name.text (typeArrow members tpe)
+              ps = do 
+                nullableTpe <- importFrom "Data.Nullable" (importType "Nullable")
+                tell $ singleton $ declForeign name.text (typeArrow (handleNullables nullableMembers nullableTpe) tpe)
             in
               { es, ps: codegen >>= const ps }
           paramNumber | paramNumber > 0 && paramNumber <= 10 ->
@@ -94,16 +119,29 @@ parseFunctionDeclaration (ModuleName moduleName) codegen fd =
               ps = do
                 uncurriedTpe <- importFrom "Data.Function.Uncurried" (importType $ "Fn" <> show paramNumber)
                 runFn <- importFrom "Data.Function.Uncurried" (importValue $ "runFn" <> show paramNumber)
+                maybeTpe <- importFrom "Data.Maybe" (importType "Maybe")
+                nullableTpe <- importFrom "Data.Nullable" (importType "Nullable")
+                toNullableFn <- importFrom "Data.Nullable" (importValue "toNullable")
                 let
+                  members = handleNullables nullableMembers nullableTpe
                   uncurriedName = (name.text <> "Impl")
                   uncurriedFn = declForeign uncurriedName
                     ( typeApp (typeCtor uncurriedTpe)
                         (members <> [ tpe ])
                     )
+                  nameBinders = nullableMembers <#> (binderVar <<< _.name) 
+                  nameExprs = nullableMembers <#> \{ name: n, isNullable } -> 
+                    if isNullable
+                    then exprApp (exprIdent toNullableFn) [exprIdent n]
+                    else exprIdent n
+                  maybeMembers = nullableMembers <#> \{ isNullable, tpe: t } -> 
+                    if isNullable
+                    then typeApp (typeCtor maybeTpe) [t]
+                    else t
                 tell
                   [ uncurriedFn
-                  , declSignature name.text (typeArrow members tpe)
-                  , declValue name.text [] (exprApp (exprIdent runFn) [ exprIdent uncurriedName ])
+                  , declSignature name.text (typeArrow maybeMembers tpe)
+                  , declValue name.text nameBinders (exprApp (exprIdent runFn) $ [ exprIdent uncurriedName ] <> nameExprs )
                   ]
             in
               { es, ps: codegen >>= const ps }
@@ -164,8 +202,7 @@ genCode :: Array String -> Effect (Array (String /\ String))
 genCode fileNames = do
   program <- TS.createProgram fileNames
   sourceFiles <- traverse (\fn -> TS.getSourceFile program fn <#> \sf -> Tuple fn sf) fileNames
-
-  traverse generateOne (sourceFiles)
+  traverse generateOne sourceFiles
   where
   generateOne (Tuple fn sf) = unsafePartial $ do
     let
@@ -183,7 +220,7 @@ genCode fileNames = do
 
       generatedPsModule = codegenModule "Person" declarations.ps
       generatedJsModule = ES.mkProgram $
-        [ ES.parse "\"use strict\";"
-        , ES.parse $ "const " <> moduleName <> " = require(\"" <> nodeModuleName <> "\")"
+        [ ES.parse "'use strict';"
+        , ES.parse $ "const " <> moduleName <> " = require('" <> nodeModuleName <> "')"
         ] <> (declarations.es)
-    pure $ printModule generatedPsModule /\ (ES.generate generatedJsModule)
+    pure $ printModule generatedPsModule /\ (ES.generate generatedJsModule # trim # (_ <> "\n"))

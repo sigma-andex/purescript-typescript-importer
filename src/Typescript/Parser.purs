@@ -79,15 +79,13 @@ type TypeElement =
   { name :: Nullable PropertyName
   }
 
-type PropertySignature
-  =
+type PropertySignature =
   { kind :: SK.SyntaxKind SK.PropertySignature
   , name :: PropertyName
   , "type" :: Nullable TypeNode
   }
 
-type TypeAliasDeclaration
-  =
+type TypeAliasDeclaration =
   { "kind" :: SK.SyntaxKind SK.TypeAliasDeclaration
   , name :: Identifier
   , "type" :: TypeNode
@@ -97,8 +95,7 @@ type KeywordToken =
   { "kind" :: Proxy KeywordSyntaxKind
   }
 
-type TypeLiteralNode
-  =
+type TypeLiteralNode =
   { "kind" :: SK.SyntaxKind SK.TypeLiteral
   , members :: Array TypeNode
   }
@@ -107,10 +104,10 @@ type ParameterDeclaration =
   { kind :: SK.SyntaxKind SK.Parameter
   , name :: Identifier
   , type :: Nullable TypeNode
+  , questionToken :: Nullable {}
   }
 
-type FunctionDeclaration
-  =
+type FunctionDeclaration =
   { kind :: SK.SyntaxKind SK.FunctionDeclaration
   , name :: Nullable Identifier
   , parameters :: Array ParameterDeclaration
@@ -119,26 +116,22 @@ type FunctionDeclaration
 
 type EntityName = Identifier
 
-type TypeReferenceNode
-  =
+type TypeReferenceNode =
   { kind :: SK.SyntaxKind SK.TypeReference
   , typeName :: EntityName
   }
 
-type VariableDeclaration
-  =
+type VariableDeclaration =
   { name :: Identifier
   , type :: Nullable TypeNode
   }
 
-type VariableDeclarationList
-  =
+type VariableDeclarationList =
   { kind :: SK.SyntaxKind SK.VariableDeclarationList
   , declarations :: Array VariableDeclaration
   }
 
-type VariableStatement
-  =
+type VariableStatement =
   { kind :: SK.SyntaxKind SK.VariableStatement
   , declarationList :: VariableDeclarationList
   }
