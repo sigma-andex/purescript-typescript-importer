@@ -23,3 +23,5 @@ foreign import createPersonWithNameImpl :: Fn2 String (Nullable Number) Person
 
 createPersonWithName :: String -> Maybe Number -> Person
 createPersonWithName name age = runFn2 createPersonWithNameImpl name (toNullable age)
+
+type NullablePerson = { name :: Nullable String, age :: Nullable Number }

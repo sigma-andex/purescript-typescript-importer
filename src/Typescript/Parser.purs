@@ -82,6 +82,7 @@ type TypeElement =
 type PropertySignature =
   { kind :: SK.SyntaxKind SK.PropertySignature
   , name :: PropertyName
+  , questionToken :: Nullable {}
   , "type" :: Nullable TypeNode
   }
 

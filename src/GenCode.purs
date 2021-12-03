@@ -1,4 +1,15 @@
-module GenCode where
+module GenCode
+  ( ModuleName(..)
+  , Parameter
+  , constJust
+  , genCode
+  , parseFunctionDeclaration
+  , parseNode
+  , parseTypeAliasDeclaration
+  , parseVariableDeclaration
+  , parseVariableStatement
+  )
+  where
 
 import Prelude
 
@@ -31,6 +42,8 @@ newtype ModuleName = ModuleName String
 
 instance Newtype ModuleName String
 
+withNullable t = typeApp (typeCtor "Nullable") [ t ]
+
 parseTypeNode :: ∀ n e. Partial => { | TS.TypeNodeR + n } -> Maybe (CST.Type e)
 parseTypeNode n@{ kind } =
   let
@@ -39,9 +52,11 @@ parseTypeNode n@{ kind } =
       ps <- TS.isPropertySignature memberNode
       let
         name = ps.name.text
+        isNullable = isJust $ toMaybe ps.questionToken
+        -- [TODO] add question token
         tpe = ps."type" # toMaybe >>= parseTypeNode
       tl <- tpe
-      Just $ Tuple name tl
+      Just $ Tuple name if isNullable then withNullable tl else tl
 
     parseTypeLiteralNode :: { | TS.TypeNodeR + n } -> Maybe (CST.Type e)
     parseTypeLiteralNode tn = TS.isTypeLiteralNode tn <#> \tln -> typeRecord (toMembers tln.members) Nothing
@@ -99,9 +114,7 @@ parseFunctionDeclaration (ModuleName moduleName) codegen fd =
     result = case maybeFnInfo of
       Just { name, nullableMembers, tpe } ->
         let 
-          handleNullables nm nullableTpe = 
-            let withNullable t = typeApp (typeCtor nullableTpe) [ t ]
-            in nm <#> \{ isNullable, tpe: t } -> if isNullable then withNullable t else t
+          handleNullables nm nullableTpe = nm <#> \{ isNullable, tpe: t } -> if isNullable then withNullable t else t
         in 
         case length nullableMembers of
           0 -> { es: [], ps: codegen } -- [TODO]: deal with effects
