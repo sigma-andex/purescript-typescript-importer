@@ -53,7 +53,6 @@ parseTypeNode n@{ kind } =
       let
         name = ps.name.text
         isNullable = isJust $ toMaybe ps.questionToken
-        -- [TODO] add question token
         tpe = ps."type" # toMaybe >>= parseTypeNode
       tl <- tpe
       Just $ Tuple name if isNullable then withNullable tl else tl
