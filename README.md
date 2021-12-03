@@ -12,3 +12,7 @@ It is also (currently) not a goal to go the other way around, i.e. from purescri
 ## Typescript <=> Purescript type correspondence
 
 See [Typescript <=> Purescript type correspondence](docs/type-correspondence.md).
+
+## Maintainers
+
+- [sigma-andex](https://github.com/sigma-andex/)
