@@ -8,8 +8,7 @@ module GenCode
   , parseTypeAliasDeclaration
   , parseVariableDeclaration
   , parseVariableStatement
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -42,7 +41,8 @@ newtype ModuleName = ModuleName String
 
 instance Newtype ModuleName String
 
-withNullable t = typeApp (typeCtor "Nullable") [ t ]
+mkNullable :: forall e. Partial => CST.Type e -> CST.Type e
+mkNullable t = typeApp (typeCtor "Nullable") [ t ]
 
 parseTypeNode :: ∀ n e. Partial => { | TS.TypeNodeR + n } -> Maybe (CST.Type e)
 parseTypeNode n@{ kind } =
@@ -55,7 +55,7 @@ parseTypeNode n@{ kind } =
         isNullable = isJust $ toMaybe ps.questionToken
         tpe = ps."type" # toMaybe >>= parseTypeNode
       tl <- tpe
-      Just $ Tuple name if isNullable then withNullable tl else tl
+      Just $ Tuple name if isNullable then mkNullable tl else tl
 
     parseTypeLiteralNode :: { | TS.TypeNodeR + n } -> Maybe (CST.Type e)
     parseTypeLiteralNode tn = TS.isTypeLiteralNode tn <#> \tln -> typeRecord (toMembers tln.members) Nothing
@@ -81,11 +81,11 @@ parseTypeAliasDeclaration (ModuleName moduleName) codegen tad = case parseTypeNo
   Just tpe -> { es: [], ps: codegen >>= const (tell [ declType tad.name.text [] tpe ]) }
   Nothing -> { es: [], ps: codegen }
 
-type Parameter e = 
-   { name :: String
-   , isNullable :: Boolean
-   , tpe :: CST.Type e 
-   } 
+type Parameter e =
+  { name :: String
+  , isNullable :: Boolean
+  , tpe :: CST.Type e
+  }
 
 parseFunctionDeclaration :: ∀ e m. Monad m => Partial => ModuleName -> CodegenT e m Unit -> TS.FunctionDeclaration -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
 parseFunctionDeclaration (ModuleName moduleName) codegen fd =
@@ -96,68 +96,62 @@ parseFunctionDeclaration (ModuleName moduleName) codegen fd =
       let
 
         parseParam :: TS.ParameterDeclaration -> Maybe (Parameter e)
-        parseParam { questionToken, "type": paramTpe, name } = 
+        parseParam { questionToken, "type": paramTpe, name } =
           toMaybe paramTpe >>= parseTypeNode <#> { isNullable: isJust $ toMaybe questionToken, name: name.text, tpe: _ }
-        -- case toMaybe questionToken of
-        --   Just qt -> typeApp (typeCtor "Data.Nullable") [ typeCtor "Int" ] ?h
-        --   Nothing -> toMaybe paramTpe >>= parseTypeNode
-        
-        params :: Array (Maybe (Parameter e) )
-        params = fd.parameters <#> parseParam 
 
-        -- parseParam mp = mp >>= parseTypeNode
+        params :: Array (Maybe (Parameter e))
+        params = fd.parameters <#> parseParam
+
         nullableMembers :: Array (Parameter e)
-        nullableMembers = params >>= Unfoldable.fromMaybe -- <#> parseParam
+        nullableMembers = params >>= Unfoldable.fromMaybe
       pure { name, nullableMembers, tpe }
 
     result = case maybeFnInfo of
       Just { name, nullableMembers, tpe } ->
-        let 
-          handleNullables nm nullableTpe = nm <#> \{ isNullable, tpe: t } -> if isNullable then withNullable t else t
-        in 
-        case length nullableMembers of
-          0 -> { es: [], ps: codegen } -- [TODO]: deal with effects
-          1 ->
-            let
-              es = singleton $ ES.parse $ "exports." <> name.text <> " = " <> moduleName <> "." <> name.text <> ";"
-              ps = do 
-                nullableTpe <- importFrom "Data.Nullable" (importType "Nullable")
-                tell $ singleton $ declForeign name.text (typeArrow (handleNullables nullableMembers nullableTpe) tpe)
-            in
-              { es, ps: codegen >>= const ps }
-          paramNumber | paramNumber > 0 && paramNumber <= 10 ->
-            let
-              es = singleton $ ES.parse $ "exports." <> (name.text <> "Impl") <> " = " <> moduleName <> "." <> name.text <> ";"
-              ps = do
-                uncurriedTpe <- importFrom "Data.Function.Uncurried" (importType $ "Fn" <> show paramNumber)
-                runFn <- importFrom "Data.Function.Uncurried" (importValue $ "runFn" <> show paramNumber)
-                maybeTpe <- importFrom "Data.Maybe" (importType "Maybe")
-                nullableTpe <- importFrom "Data.Nullable" (importType "Nullable")
-                toNullableFn <- importFrom "Data.Nullable" (importValue "toNullable")
-                let
-                  members = handleNullables nullableMembers nullableTpe
-                  uncurriedName = (name.text <> "Impl")
-                  uncurriedFn = declForeign uncurriedName
-                    ( typeApp (typeCtor uncurriedTpe)
-                        (members <> [ tpe ])
-                    )
-                  nameBinders = nullableMembers <#> (binderVar <<< _.name) 
-                  nameExprs = nullableMembers <#> \{ name: n, isNullable } -> 
-                    if isNullable
-                    then exprApp (exprIdent toNullableFn) [exprIdent n]
-                    else exprIdent n
-                  maybeMembers = nullableMembers <#> \{ isNullable, tpe: t } -> 
-                    if isNullable
-                    then typeApp (typeCtor maybeTpe) [t]
-                    else t
-                tell
-                  [ uncurriedFn
-                  , declSignature name.text (typeArrow maybeMembers tpe)
-                  , declValue name.text nameBinders (exprApp (exprIdent runFn) $ [ exprIdent uncurriedName ] <> nameExprs )
-                  ]
-            in
-              { es, ps: codegen >>= const ps }
-          _ -> { es: [], ps: codegen }
+        let
+          handleNullables nm = nm <#> \{ isNullable, tpe: t } -> if isNullable then mkNullable t else t
+        in
+          case length nullableMembers of
+            0 -> { es: [], ps: codegen } -- [TODO]: deal with effects
+            1 ->
+              let
+                es = singleton $ ES.parse $ "exports." <> name.text <> " = " <> moduleName <> "." <> name.text <> ";"
+                ps = do
+                  nullableTpe <- importFrom "Data.Nullable" (importType "Nullable")
+                  tell $ singleton $ declForeign name.text (typeArrow (handleNullables nullableMembers) tpe)
+              in
+                { es, ps: codegen >>= const ps }
+            paramNumber | paramNumber > 0 && paramNumber <= 10 ->
+              let
+                es = singleton $ ES.parse $ "exports." <> (name.text <> "Impl") <> " = " <> moduleName <> "." <> name.text <> ";"
+                ps = do
+                  uncurriedTpe <- importFrom "Data.Function.Uncurried" (importType $ "Fn" <> show paramNumber)
+                  runFn <- importFrom "Data.Function.Uncurried" (importValue $ "runFn" <> show paramNumber)
+                  maybeTpe <- importFrom "Data.Maybe" (importType "Maybe")
+                  nullableTpe <- importFrom "Data.Nullable" (importType "Nullable")
+                  toNullableFn <- importFrom "Data.Nullable" (importValue "toNullable")
+                  let
+                    members = handleNullables nullableMembers
+                    uncurriedName = (name.text <> "Impl")
+                    uncurriedFn = declForeign uncurriedName
+                      ( typeApp (typeCtor uncurriedTpe)
+                          (members <> [ tpe ])
+                      )
+                    nameBinders = nullableMembers <#> (binderVar <<< _.name)
+                    nameExprs = nullableMembers <#> \{ name: n, isNullable } ->
+                      if isNullable then exprApp (exprIdent toNullableFn) [ exprIdent n ]
+                      else exprIdent n
+                    maybeMembers = nullableMembers <#> \{ isNullable, tpe: t } ->
+                      if isNullable then typeApp (typeCtor maybeTpe) [ t ]
+                      else t
+                  tell
+                    [ uncurriedFn
+                    , declSignature name.text (typeArrow maybeMembers tpe)
+                    , declValue name.text nameBinders (exprApp (exprIdent runFn) $ [ exprIdent uncurriedName ] <> nameExprs)
+                    ]
+              in
+                { es, ps: codegen >>= const ps }
+            _ -> { es: [], ps: codegen }
       Nothing -> { es: [], ps: codegen }
   in
     result
