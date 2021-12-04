@@ -10,7 +10,7 @@ import GenCode (genCode)
 
 main :: Effect Unit
 main = do
-  log "---Typescript file loading---"
-  code <- genCode [ "person/person.ts" ]
-  log $ intercalate "\n" $ code <#> fst
-  log $ intercalate "\n" $ code <#> snd
+  log "---NOT YET IMPLEMENTED---"
+  --code <- genCode [ "person/person.ts" ]
+  --log $ intercalate "\n" $ code <#> fst
+  --log $ intercalate "\n" $ code <#> snd

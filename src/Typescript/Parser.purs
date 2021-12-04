@@ -1,4 +1,39 @@
-module Typescript.Parser where
+module Typescript.Parser
+  ( EntityName
+  , FunctionDeclaration
+  , Identifier
+  , KeywordSyntaxKind
+  , KeywordToken
+  , Node
+  , NodeR
+  , ParameterDeclaration
+  , Program
+  , PropertyName
+  , PropertySignature
+  , SourceFile
+  , TypeAliasDeclaration
+  , TypeElement
+  , TypeLiteralNode
+  , TypeNode
+  , TypeNodeR
+  , TypeReferenceNode
+  , VariableDeclaration
+  , VariableDeclarationList
+  , VariableStatement
+  , createProgram
+  , createSourceFile
+  , getChildren
+  , getSourceFile
+  , getSourceFileChildren
+  , getSourceFileName
+  , getSourceFiles
+  , isFunctionDeclaration
+  , isPropertySignature
+  , isTypeAliasDeclaration
+  , isTypeLiteralNode
+  , isTypeReferenceNode
+  , isVariableStatement
+  ) where
 
 import Prelude
 
@@ -83,7 +118,7 @@ type PropertySignature =
   { kind :: SK.SyntaxKind SK.PropertySignature
   , name :: PropertyName
   , questionToken :: Nullable {}
-  , "type" :: Nullable TypeNode
+  , type :: Nullable TypeNode
   }
 
 type TypeAliasDeclaration =
