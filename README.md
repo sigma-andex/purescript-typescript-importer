@@ -13,6 +13,13 @@ It is also (currently) not a goal to go the other way around, i.e. from purescri
 
 See [Typescript <≡> Purescript type correspondence](docs/type-correspondence.md).
 
+## Usage
+
+```bash
+# WIP, run it using spago, pass arguments using --exec-args
+spago run --exec-args "import <NODE_MODULE>"
+```
+
 ## Maintainers
 
 - [sigma-andex](https://github.com/sigma-andex/)
