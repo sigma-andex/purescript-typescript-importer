@@ -2,16 +2,24 @@ module Main where
 
 import Prelude
 
+import Data.Array (filter)
+import Data.String (joinWith)
 import Effect (Effect)
-import Effect.Console (log)
+import Effect.Aff (launchAff_)
+import Effect.Class (liftEffect)
+import Effect.Class.Console (logShow, log)
+import GenCode (genCode)
+import Node.FS.Aff as AFS
+import Node.Path as Path
+import Node.Process as Process
 import Options.Applicative (Parser, argument, command, execParser, fullDesc, header, help, helper, hsubparser, info, long, metavar, progDesc, short, str, strOption, value, (<**>))
 
-data Opts = Import
+data Settings = Import
   { nodeModule :: String
   , outputDir :: String
   }
 
-sample :: Parser Opts
+sample :: Parser Settings
 sample = hsubparser
   ( command "import" (info progInfo (progDesc "Import a typescript NODE_MODULE as purescript ffi"))
   )
@@ -36,5 +44,18 @@ main = run =<< execParser opts
         <> header "purescript <≡> typescript importer"
     )
 
-run :: Opts -> Effect Unit
-run (Import h) = log $ show h
+run :: Settings -> Effect Unit
+run (Import settings) = launchAff_ do
+  cwd <- liftEffect Process.cwd
+  let
+    paths = [ cwd ] <> [ "node_modules", settings.nodeModule ]
+    dir = Path.concat paths
+  listedFiles <- AFS.readdir dir
+  let
+    files = listedFiles
+      # filter (\p -> Path.extname p == ".ts")
+      <#>
+        (\file -> Path.concat $ paths <> [ file ])
+  log $ "Importing files:\n" <> joinWith "," files
+  generatedCode <- liftEffect $ genCode files
+  logShow generatedCode

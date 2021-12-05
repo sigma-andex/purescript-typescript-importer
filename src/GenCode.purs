@@ -212,7 +212,6 @@ genCode fileNames = do
   where
   generateOne (Tuple fn sf) = unsafePartial $ do
     let
-      _ = spy "Filename" fn
       moduleName = "Person"
       nodeModuleName = "person"
 
