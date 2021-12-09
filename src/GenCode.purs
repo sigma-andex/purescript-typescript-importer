@@ -206,7 +206,7 @@ parseNode moduleName codegen n@{ kind } =
 
 genCode :: Array String -> Effect (Array (String /\ String))
 genCode fileNames = do
-  program <- TS.createProgram fileNames
+  program <- TS.createProgram $ spy "filenames" fileNames
   sourceFiles <- traverse (\fn -> TS.getSourceFile program fn <#> \sf -> Tuple fn sf) fileNames
   traverse generateOne sourceFiles
   where

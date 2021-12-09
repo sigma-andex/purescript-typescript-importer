@@ -2,16 +2,18 @@ module Main where
 
 import Prelude
 
-import Data.Array (filter)
-import Data.String (joinWith)
+import Control.Alt ((<|>))
+import Data.Argonaut as Argonaut
+import Data.Either (Either(..))
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (logShow, log)
 import GenCode (genCode)
+import Node.Encoding (Encoding(..))
 import Node.FS.Aff as AFS
 import Node.Path as Path
-import Node.Process as Process
 import Options.Applicative (Parser, argument, command, execParser, fullDesc, header, help, helper, hsubparser, info, long, metavar, progDesc, short, str, strOption, value, (<**>))
 
 data Settings = Import
@@ -44,18 +46,30 @@ main = run =<< execParser opts
         <> header "purescript <≡> typescript importer"
     )
 
+type PackageJson =
+  { "types" :: Maybe String
+  , "typings" :: Maybe String
+  }
+
+fromJson :: forall t. Argonaut.DecodeJson t => String -> Either Argonaut.JsonDecodeError t
+fromJson = Argonaut.parseJson >=> Argonaut.decodeJson
+
 run :: Settings -> Effect Unit
 run (Import settings) = launchAff_ do
-  cwd <- liftEffect Process.cwd
   let
-    paths = [ cwd ] <> [ "node_modules", settings.nodeModule ]
-    dir = Path.concat paths
-  listedFiles <- AFS.readdir dir
-  let
-    files = listedFiles
-      # filter (\p -> Path.extname p == ".ts")
-      <#>
-        (\file -> Path.concat $ paths <> [ file ])
-  log $ "Importing files:\n" <> joinWith "," files
-  generatedCode <- liftEffect $ genCode files
-  logShow generatedCode
+    modulePath = [ "node_modules", settings.nodeModule ]
+    packageJsonPath = Path.concat $ modulePath <> [ "package.json" ]
+    modulesDir = Path.concat modulePath
+  packageJson <- AFS.readTextFile UTF8 packageJsonPath
+  case fromJson packageJson :: Either Argonaut.JsonDecodeError PackageJson of
+    Right pkgJson -> case pkgJson."types" <|> pkgJson."typings" of
+      Just typingsRelPath -> do
+        let
+          typingsAbsPath = Path.concat [ modulesDir, typingsRelPath ]
+        let
+          files = [ typingsAbsPath ]
+        generatedCode <- liftEffect $ genCode files
+        logShow generatedCode
+
+      Nothing -> log $ "Module " <> settings.nodeModule <> " doesn't seem to contain a valid \"types\" section."
+    Left _ -> log $ "Module " <> settings.nodeModule <> " doesn't seem to contain a valid package.json."
