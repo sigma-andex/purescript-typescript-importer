@@ -1,6 +1,7 @@
 { name = "typescript-importer"
 , dependencies =
   [ "aff"
+  , "argonaut"
   , "arrays"
   , "console"
   , "control"
