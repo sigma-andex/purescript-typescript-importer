@@ -3,6 +3,7 @@
   [ "aff"
   , "argonaut"
   , "arrays"
+  , "bifunctors"
   , "console"
   , "control"
   , "debug"
