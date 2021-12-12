@@ -18,6 +18,7 @@ import Data.Maybe (Maybe(..), isJust, maybe)
 import Data.Newtype (class Newtype)
 import Data.Nullable (Nullable, toMaybe)
 import Data.String (trim)
+import Data.String.Extra as SE
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Data.Tuple.Nested (type (/\), (/\))
@@ -204,16 +205,19 @@ parseNode moduleName codegen n@{ kind } =
   in
     caseFn kind
 
-genCode :: Array String -> Effect (Array (String /\ String))
-genCode fileNames = do
-  program <- TS.createProgram $ spy "filenames" fileNames
+type CodegenConfig = { nodeModule :: String, fileNames :: Array String }
+
+type CogenOutput = { psFileName :: String, psCode :: String, esFileName :: String, esCode :: String }
+
+genCode :: CodegenConfig -> Effect (Array CogenOutput)
+genCode { nodeModule, fileNames } = do
+  program <- TS.createProgram fileNames
   sourceFiles <- traverse (\fn -> TS.getSourceFile program fn <#> \sf -> Tuple fn sf) fileNames
   traverse generateOne sourceFiles
   where
   generateOne (Tuple fn sf) = unsafePartial $ do
     let
-      moduleName = "Person"
-      nodeModuleName = "person"
+      moduleName = SE.pascalCase nodeModule
 
       acc { es: esInput, ps: psInput } node =
         let
@@ -223,9 +227,15 @@ genCode fileNames = do
 
       declarations = TS.getSourceFileChildren sf >>= TS.getChildren # foldl acc { es: [], ps: pure unit }
 
-      generatedPsModule = codegenModule "Person" declarations.ps
+      generatedPsModule = codegenModule moduleName declarations.ps
       generatedJsModule = ES.mkProgram $
         [ ES.parse "'use strict';"
-        , ES.parse $ "const " <> moduleName <> " = require('" <> nodeModuleName <> "')"
+        , ES.parse $ "const " <> moduleName <> " = require('" <> nodeModule <> "')"
         ] <> (declarations.es)
-    pure $ printModule generatedPsModule /\ (ES.generate generatedJsModule # trim # (_ <> "\n"))
+
+      psFileName = moduleName <> ".purs"
+      esFileName = moduleName <> ".js"
+
+      psCode = printModule generatedPsModule
+      esCode = ES.generate generatedJsModule # trim # (_ <> "\n")
+    pure $ { psFileName, psCode, esFileName, esCode }

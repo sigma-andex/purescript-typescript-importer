@@ -34,15 +34,11 @@ testDir ∷ FilePath → FilePath → Spec Unit
 testDir expected fullDirName =
   it dirName do
     fullFileNames ← readdir (original <> fullDirName)
-    actuals <- liftEffect $ genCode (map (\f -> original <> fullDirName <> "/" <> f) fullFileNames)
-    for_ (zip fullFileNames actuals) \(Tuple fileName actual) -> do
-      let 
-        goldenFileName = pascalCase (basenameWithoutExt fileName "ts")
-        psFileName = goldenFileName <> ".purs"
-        jsFileName = goldenFileName <> ".js"
+    actuals <- liftEffect $ genCode { nodeModule: fullDirName, fileNames: (map (\f -> original <> fullDirName <> "/" <> f) fullFileNames) }
+    for_ actuals \{ psFileName, psCode, esFileName, esCode } -> do
 
-      Actual (fst actual) `shouldBeGolden` GoldenFile (expected <> dirName <> "/" <> psFileName)
-      Actual (snd actual) `shouldBeGolden` GoldenFile (expected <> dirName <> "/" <> jsFileName)
+      Actual psCode `shouldBeGolden` GoldenFile (expected <> dirName <> "/" <> psFileName)
+      Actual esCode `shouldBeGolden` GoldenFile (expected <> dirName <> "/" <> esFileName)
   where
   dirName = basename fullDirName
 

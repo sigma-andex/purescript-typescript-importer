@@ -76,10 +76,15 @@ run (ImportCmd { nodeModule, outputDir }) = launchAff_ do
         let
           typingsAbsPath = Path.concat [ modulesDir, typingsRelPath ]
         let
-          files = [ typingsAbsPath ]
-        generatedCode <- liftEffect $ genCode files
-        logShow generatedCode
-
+          fileNames = [ typingsAbsPath ]
+        generatedCode <- liftEffect $ genCode { nodeModule, fileNames }
+        _ <- for generatedCode \{ psFileName, psCode, esFileName, esCode } -> do
+          let
+            psFilePath = Path.concat [ outputDir, psFileName ]
+            esFilePath = Path.concat [ outputDir, esFileName ]
+          AFS.writeTextFile UTF8 psFilePath psCode
+          AFS.writeTextFile UTF8 esFilePath esCode
+        pure unit
       Nothing -> log $ "Module " <> nodeModule <> " doesn't seem to contain a valid \"types\" section."
     Left _ -> log $ "Module " <> nodeModule <> " doesn't seem to contain a valid package.json."
 run (ListCmd) = launchAff_ do
