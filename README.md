@@ -15,8 +15,12 @@ See [Typescript <≡> Purescript type correspondence](docs/type-correspondence.m
 
 ## Usage
 
+WIP, run it using spago, pass arguments using --exec-args
+
 ```bash
-# WIP, run it using spago, pass arguments using --exec-args
+# list modules with typescript type definitions
+spago run --exec-args "list"
+# import module
 spago run --exec-args "import <NODE_MODULE>"
 ```
 
