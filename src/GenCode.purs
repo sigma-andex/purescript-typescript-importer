@@ -74,6 +74,7 @@ parseTypeNode n@{ kind } =
         # on' SK.typeReference (const (parseTypeReference n))
         # on' SK.numberKeyword (constJust $ typeCtor "Number")
         # on' SK.stringKeyword (constJust $ typeCtor "String")
+        # on' SK.booleanKeyword (constJust $ typeCtor "Boolean")
   in
     caseFn kind
 
