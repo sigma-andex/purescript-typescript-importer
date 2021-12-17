@@ -171,3 +171,17 @@ type VariableStatement =
   { kind :: SK.SyntaxKind SK.VariableStatement
   , declarationList :: VariableDeclarationList
   }
+
+type Statement = {}
+type ModuleBlock = {
+  kind :: SK.SyntaxKind SK.ModuleBlock
+, statements :: Array Statement
+}
+type NamespaceBody = ModuleBlock
+type ModuleBody = NamespaceBody
+type ModuleDeclaration = 
+  {
+    kind :: SK.SyntaxKind SK.ModuleDeclaration
+  , name :: Identifier
+  , body :: Nullable ModuleBody
+  }
