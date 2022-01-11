@@ -4,6 +4,10 @@ module Typescript.Parser
   , Identifier
   , KeywordSyntaxKind
   , KeywordToken
+  , ModuleBlock
+  , ModuleBody
+  , ModuleDeclaration
+  , NamespaceBody
   , Node
   , NodeR
   , ParameterDeclaration
@@ -11,6 +15,7 @@ module Typescript.Parser
   , PropertyName
   , PropertySignature
   , SourceFile
+  , Statement
   , TypeAliasDeclaration
   , TypeElement
   , TypeLiteralNode
@@ -28,6 +33,8 @@ module Typescript.Parser
   , getSourceFileName
   , getSourceFiles
   , isFunctionDeclaration
+  , isModuleBlock
+  , isModuleDeclaration
   , isPropertySignature
   , isTypeAliasDeclaration
   , isTypeLiteralNode
@@ -91,6 +98,18 @@ foreign import isVariableStatementImpl :: forall r. { | NodeR r } -> Nullable Va
 
 isVariableStatement :: forall r. { | NodeR r } -> Maybe VariableStatement
 isVariableStatement = isVariableStatementImpl >>> toMaybe
+
+-- function isModuleDeclaration(node: Node): node is ModuleDeclaration;
+-- function isModuleBlock(node: Node): node is ModuleBlock;
+foreign import isModuleDeclarationImpl :: forall r. { | NodeR r } -> Nullable ModuleDeclaration
+
+isModuleDeclaration :: forall r. { | NodeR r } -> Maybe ModuleDeclaration
+isModuleDeclaration = isModuleDeclarationImpl >>> toMaybe
+
+foreign import isModuleBlockImpl :: forall r. { | NodeR r } -> Nullable ModuleBlock
+
+isModuleBlock :: forall r. { | NodeR r } -> Maybe ModuleBlock
+isModuleBlock = isModuleBlockImpl >>> toMaybe
 
 type Identifier
   = { text :: String }
@@ -172,16 +191,16 @@ type VariableStatement =
   , declarationList :: VariableDeclarationList
   }
 
-type Statement = {}
-type ModuleBlock = {
-  kind :: SK.SyntaxKind SK.ModuleBlock
-, statements :: Array Statement
-}
+type Statement = Node
+type ModuleBlock =
+  { kind :: SK.SyntaxKind SK.ModuleBlock
+  , statements :: Array Statement
+  }
+
 type NamespaceBody = ModuleBlock
 type ModuleBody = NamespaceBody
-type ModuleDeclaration = 
-  {
-    kind :: SK.SyntaxKind SK.ModuleDeclaration
+type ModuleDeclaration =
+  { kind :: SK.SyntaxKind SK.ModuleDeclaration
   , name :: Identifier
-  , body :: Nullable ModuleBody
+  , body :: Nullable ModuleBlock
   }
