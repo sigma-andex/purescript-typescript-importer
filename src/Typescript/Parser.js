@@ -34,3 +34,9 @@ exports.isTypeReferenceNodeImpl = (node) =>
 
 exports.isVariableStatementImpl = (node) =>
     ts.isVariableStatement(node) ? node : null
+
+exports.isModuleDeclarationImpl = (node) =>
+    ts.isModuleDeclaration(node) ? node : null
+
+exports.isModuleBlockImpl = (node) =>
+    ts.isModuleBlock(node) ? node : null

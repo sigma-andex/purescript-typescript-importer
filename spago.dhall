@@ -38,6 +38,10 @@
   , "unsafe-coerce"
   , "untagged-union"
   , "uuid"
+  , "functions"
+  , "node-process"
+  , "ordered-collections"
+  , "record"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

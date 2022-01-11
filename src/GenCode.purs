@@ -1,9 +1,12 @@
 module GenCode
-  ( ModuleName(..)
+  ( GeneratedCode(..)
+  , ModuleName(..)
   , Parameter
   , constJust
   , genCode
   , parseFunctionDeclaration
+  , parseModuleBlock
+  , parseModuleDeclaration
   , parseNode
   , parseTypeAliasDeclaration
   , parseVariableDeclaration
@@ -14,14 +17,14 @@ import Prelude
 
 import Control.Monad.Writer (tell)
 import Data.Array (foldl, length, singleton)
+import Data.Foldable (intercalate)
 import Data.Maybe (Maybe(..), isJust, maybe)
-import Data.Newtype (class Newtype)
-import Data.Nullable (Nullable, toMaybe)
+import Data.Nullable (toMaybe)
+import Data.Nullable as Nullable
 import Data.String (trim)
 import Data.String.Extra as SE
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
-import Data.Tuple.Nested (type (/\), (/\))
 import Data.Unfoldable as Unfoldable
 import Debug (spy)
 import Effect (Effect)
@@ -38,9 +41,19 @@ import Typescript.Utils.Enum (default', on')
 constJust :: forall a b. a -> b -> Maybe a
 constJust = Just >>> const
 
-newtype ModuleName = ModuleName String
+type ModuleName = { nodeModule :: String, fileName :: String, namespaces :: Array String }
 
-instance Newtype ModuleName String
+pushNamespace :: ModuleName -> String -> ModuleName
+pushNamespace { nodeModule, fileName, namespaces } s = { nodeModule, fileName, namespaces: namespaces <> [ s ] }
+
+mkPureScriptModuleName :: ModuleName -> String
+mkPureScriptModuleName mn = intercalate "." (map SE.pascalCase ([ mn.nodeModule ] <> mn.namespaces))
+
+mkOutputFileName :: ModuleName -> String
+mkOutputFileName mn = intercalate "/" (map SE.pascalCase ([ mn.nodeModule ] <> mn.namespaces))
+
+mkTypeScriptName :: ModuleName -> String -> String
+mkTypeScriptName { fileName, namespaces } name = intercalate "." $ map SE.pascalCase namespaces <> [ name ]
 
 mkNullable :: forall e. Partial => CST.Type e -> CST.Type e
 mkNullable t = typeApp (typeCtor "Nullable") [ t ]
@@ -78,8 +91,23 @@ parseTypeNode n@{ kind } =
   in
     caseFn kind
 
-parseTypeAliasDeclaration :: ∀ e m. Monad m => Partial => ModuleName -> CodegenT e m Unit -> TS.TypeAliasDeclaration -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
-parseTypeAliasDeclaration (ModuleName moduleName) codegen tad = case parseTypeNode tad."type" of
+-- [TODO] nested namespaces => separated files, use Data.Map?
+type GeneratedCode e m = { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
+
+foldGeneratedCode :: ∀ e m t. Partial => (ModuleName -> CodegenT e m Unit -> t -> GeneratedCode e m) -> ModuleName -> CodegenT e m Unit -> Array t -> GeneratedCode e m
+foldGeneratedCode f mn codegen elems =
+  let
+    acc { es: esInput, ps: psInput } elem =
+      let
+        { es: esOutput, ps: psOutput } = f mn psInput elem
+      in
+        { es: esInput <> esOutput, ps: psOutput }
+    result = foldl acc { es: [], ps: codegen } elems
+  in
+    result
+
+parseTypeAliasDeclaration :: ∀ e m. Partial => Monad m => ModuleName -> CodegenT e m Unit -> TS.TypeAliasDeclaration -> GeneratedCode e m
+parseTypeAliasDeclaration moduleName codegen tad = case parseTypeNode tad."type" of
   Just tpe -> { es: [], ps: codegen >>= const (tell [ declType tad.name.text [] tpe ]) }
   Nothing -> { es: [], ps: codegen }
 
@@ -89,8 +117,8 @@ type Parameter e =
   , tpe :: CST.Type e
   }
 
-parseFunctionDeclaration :: ∀ e m. Monad m => Partial => ModuleName -> CodegenT e m Unit -> TS.FunctionDeclaration -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
-parseFunctionDeclaration (ModuleName moduleName) codegen fd =
+parseFunctionDeclaration :: ∀ e m. Partial => Monad m => ModuleName -> CodegenT e m Unit -> TS.FunctionDeclaration -> GeneratedCode e m
+parseFunctionDeclaration moduleName codegen fd =
   let
     maybeFnInfo = do
       name <- toMaybe fd.name
@@ -117,7 +145,7 @@ parseFunctionDeclaration (ModuleName moduleName) codegen fd =
             0 -> { es: [], ps: codegen } -- [TODO]: deal with effects
             1 ->
               let
-                es = singleton $ ES.parse $ "exports." <> name.text <> " = " <> moduleName <> "." <> name.text <> ";"
+                es = singleton $ ES.parse $ "exports." <> name.text <> " = " <> (mkTypeScriptName moduleName name.text) <> ";"
                 ps = do
                   nullableTpe <- importFrom "Data.Nullable" (importType "Nullable")
                   tell $ singleton $ declForeign name.text (typeArrow (handleNullables nullableMembers) tpe)
@@ -125,7 +153,7 @@ parseFunctionDeclaration (ModuleName moduleName) codegen fd =
                 { es, ps: codegen >>= const ps }
             paramNumber | paramNumber > 0 && paramNumber <= 10 ->
               let
-                es = singleton $ ES.parse $ "exports." <> (name.text <> "Impl") <> " = " <> moduleName <> "." <> name.text <> ";"
+                es = singleton $ ES.parse $ "exports." <> (name.text <> "Impl") <> " = " <> (mkTypeScriptName moduleName name.text) <> ";"
                 ps = do
                   uncurriedTpe <- importFrom "Data.Function.Uncurried" (importType $ "Fn" <> show paramNumber)
                   runFn <- importFrom "Data.Function.Uncurried" (importValue $ "runFn" <> show paramNumber)
@@ -158,11 +186,11 @@ parseFunctionDeclaration (ModuleName moduleName) codegen fd =
   in
     result
 
-parseVariableDeclaration :: ∀ e m. Monad m => Partial => ModuleName -> CodegenT e m Unit -> TS.VariableDeclaration -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
-parseVariableDeclaration (ModuleName moduleName) codegen { name, "type": tpe } = case toMaybe tpe >>= parseTypeNode of
+parseVariableDeclaration :: ∀ e m. Partial => Monad m => ModuleName -> CodegenT e m Unit -> TS.VariableDeclaration -> GeneratedCode e m
+parseVariableDeclaration moduleName codegen { name, "type": tpe } = case toMaybe tpe >>= parseTypeNode of
   Just tpeNode ->
     let
-      es = singleton $ ES.parse $ "exports." <> (name.text) <> " = " <> moduleName <> "." <> name.text <> ";"
+      es = singleton $ ES.parse $ "exports." <> (name.text) <> " = " <> (mkTypeScriptName moduleName name.text) <> ";"
       ps = tell $ singleton $ declForeign name.text tpeNode
     in
       { es, ps: codegen >>= const ps }
@@ -170,7 +198,7 @@ parseVariableDeclaration (ModuleName moduleName) codegen { name, "type": tpe } =
     -- [TODO]: decide what we do if we don't have a type annotation
     { es: [], ps: codegen }
 
-parseVariableStatement :: ∀ e m. Monad m => Partial => ModuleName -> CodegenT e m Unit -> TS.VariableStatement -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
+parseVariableStatement :: ∀ e m. Partial => Monad m => ModuleName -> CodegenT e m Unit -> TS.VariableStatement -> GeneratedCode e m
 parseVariableStatement mn codegen vs =
   let
     acc { es: esInput, ps: psInput } vd =
@@ -182,7 +210,24 @@ parseVariableStatement mn codegen vs =
   in
     result
 
-parseNode :: ∀ n e m. Monad m => Partial => ModuleName -> CodegenT e m Unit -> { | TS.NodeR + n } -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
+parseModuleBlock :: ∀ e m. Partial => Monad m => ModuleName -> CodegenT e m Unit -> TS.ModuleBlock -> GeneratedCode e m
+parseModuleBlock mn codegen mb = do
+  let
+    statements = mb.statements
+  foldGeneratedCode parseNode mn codegen statements
+
+parseModuleDeclaration :: ∀ e m. Partial => Monad m => ModuleName -> CodegenT e m Unit -> TS.ModuleDeclaration -> GeneratedCode e m
+parseModuleDeclaration mn codegen md = do
+  let
+    moduleName = md.name
+    maybeBody = Nullable.toMaybe md.body
+  case maybeBody of
+    Just body ->
+      -- [TODO] merge if same nm/moduleName?
+      parseModuleBlock (spy "ModuleName" (pushNamespace mn moduleName.text)) codegen body
+    Nothing -> { es: [], ps: codegen }
+
+parseNode :: ∀ n e m. Partial => Monad m => ModuleName -> CodegenT e m Unit -> { | TS.NodeR + n } -> GeneratedCode e m
 parseNode moduleName codegen n@{ kind } =
   let
     empty = { es: [], ps: codegen }
@@ -192,17 +237,18 @@ parseNode moduleName codegen n@{ kind } =
     mkHandler
       :: forall t enum
        . ({ | TS.NodeR + n } -> Maybe t)
-      -> (ModuleName -> CodegenT e m Unit -> t -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit })
+      -> (ModuleName -> CodegenT e m Unit -> t -> GeneratedCode e m)
       -> enum
-      -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
+      -> GeneratedCode e m
     mkHandler isOfType parseType = const $ isOfType n <#> parseType moduleName codegen # getOrEmpty
 
-    caseFn :: SK.SyntaxKindEnum -> { es :: Array ES.ESNode, ps :: CodegenT e m Unit }
+    caseFn :: SK.SyntaxKindEnum -> GeneratedCode e m
     caseFn =
       default' empty
         # on' SK.typeAliasDeclaration (mkHandler TS.isTypeAliasDeclaration parseTypeAliasDeclaration)
         # on' SK.functionDeclaration (mkHandler TS.isFunctionDeclaration parseFunctionDeclaration)
         # on' SK.variableStatement (mkHandler TS.isVariableStatement parseVariableStatement)
+        # on' SK.moduleDeclaration (mkHandler TS.isModuleDeclaration parseModuleDeclaration)
   in
     caseFn kind
 
@@ -222,7 +268,7 @@ genCode { nodeModule, fileNames } = do
 
       acc { es: esInput, ps: psInput } node =
         let
-          { es: esOutput, ps: psOutput } = parseNode (ModuleName moduleName) psInput node
+          { es: esOutput, ps: psOutput } = parseNode { nodeModule, fileName: fn, namespaces: [] } psInput node
         in
           { es: esInput <> esOutput, ps: psOutput }
 
