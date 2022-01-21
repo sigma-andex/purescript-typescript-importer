@@ -17,7 +17,7 @@ import Prelude
 
 import Control.Monad.Writer (tell)
 import Data.Array (foldl, length, singleton)
-import Data.Foldable (intercalate)
+import Data.Foldable (intercalate, null)
 import Data.Maybe (Maybe(..), isJust, maybe)
 import Data.Nullable (toMaybe)
 import Data.Nullable as Nullable
@@ -26,7 +26,6 @@ import Data.String.Extra as SE
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Data.Unfoldable as Unfoldable
-import Debug (spy)
 import Effect (Effect)
 import FFI.ESTree as ES
 import Partial.Unsafe (unsafePartial)
@@ -47,13 +46,18 @@ pushNamespace :: ModuleName -> String -> ModuleName
 pushNamespace { nodeModule, fileName, namespaces } s = { nodeModule, fileName, namespaces: namespaces <> [ s ] }
 
 mkPureScriptModuleName :: ModuleName -> String
-mkPureScriptModuleName mn = intercalate "." (map SE.pascalCase ([ mn.nodeModule ] <> mn.namespaces))
+mkPureScriptModuleName { fileName, nodeModule, namespaces } =
+  intercalate "." (map SE.pascalCase ([ nodeModule ] <> namespaces))
 
 mkOutputFileName :: ModuleName -> String
 mkOutputFileName mn = intercalate "/" (map SE.pascalCase ([ mn.nodeModule ] <> mn.namespaces))
 
 mkTypeScriptName :: ModuleName -> String -> String
-mkTypeScriptName { fileName, namespaces } name = intercalate "." $ map SE.pascalCase namespaces <> [ name ]
+mkTypeScriptName { nodeModule, namespaces } name =
+  if null namespaces then
+    intercalate "." $ [ SE.pascalCase nodeModule ] <> [ name ]
+  else
+    intercalate "." $ (SE.pascalCase <$> namespaces) <> [ name ]
 
 mkNullable :: forall e. Partial => CST.Type e -> CST.Type e
 mkNullable t = typeApp (typeCtor "Nullable") [ t ]
@@ -224,7 +228,7 @@ parseModuleDeclaration mn codegen md = do
   case maybeBody of
     Just body ->
       -- [TODO] merge if same nm/moduleName?
-      parseModuleBlock (spy "ModuleName" (pushNamespace mn moduleName.text)) codegen body
+      parseModuleBlock (pushNamespace mn moduleName.text) codegen body
     Nothing -> { es: [], ps: codegen }
 
 parseNode :: ∀ n e m. Partial => Monad m => ModuleName -> CodegenT e m Unit -> { | TS.NodeR + n } -> GeneratedCode e m
