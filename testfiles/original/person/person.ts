@@ -3,6 +3,8 @@ type Person = {
     age: number
 }
 
+type Age = number
+
 export function getAge(person: Person): number { return person.age }
 
 export function createPerson(name: string, age: number): Person {

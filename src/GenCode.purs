@@ -30,12 +30,13 @@ import Effect (Effect)
 import FFI.ESTree as ES
 import Partial.Unsafe (unsafePartial)
 import PureScript.CST.Types as CST
-import Tidy.Codegen (binderVar, declForeign, declSignature, declType, declValue, exprApp, exprIdent, printModule, typeApp, typeArrow, typeCtor, typeRecord)
+import Tidy.Codegen (binderVar, declForeign, declSignature, declType, declValue, exprApp, exprIdent, printModule, typeApp, typeArrow, typeCtor, typeRecord, typeRow, typeRowEmpty, typeVar)
 import Tidy.Codegen.Monad (CodegenT, codegenModule, importFrom, importType, importValue)
 import Type.Row (type (+))
 import Typescript.Parser as TS
 import Typescript.SyntaxKind as SK
 import Typescript.Utils.Enum (default', on')
+import Unsafe.Coerce (unsafeCoerce)
 
 constJust :: forall a b. a -> b -> Maybe a
 constJust = Just >>> const
@@ -76,7 +77,8 @@ parseTypeNode n@{ kind } =
       Just $ Tuple name if isNullable then mkNullable tl else tl
 
     parseTypeLiteralNode :: { | TS.TypeNodeR + n } -> Maybe (CST.Type e)
-    parseTypeLiteralNode tn = TS.isTypeLiteralNode tn <#> \tln -> typeRecord (toMembers tln.members) Nothing
+    parseTypeLiteralNode tn = TS.isTypeLiteralNode tn <#> \tln ->
+      typeRow (toMembers tln.members) (Just (typeVar "r"))
       where
       toMembers :: Array TS.TypeNode -> Array (Tuple String (CST.Type e))
       toMembers tnInner = tnInner <#> parseMember >>= Unfoldable.fromMaybe
@@ -112,6 +114,16 @@ foldGeneratedCode f mn codegen elems =
 
 parseTypeAliasDeclaration :: ∀ e m. Partial => Monad m => ModuleName -> CodegenT e m Unit -> TS.TypeAliasDeclaration -> GeneratedCode e m
 parseTypeAliasDeclaration moduleName codegen tad = case parseTypeNode tad."type" of
+  -- type Person = number 
+  Just tpe@(CST.TypeRow _) -> 
+    let 
+      ps = do 
+        codegen 
+        tell [
+          declType (tad.name.text <> "R") [ typeVar "r" ] tpe
+        , declType (tad.name.text) [ ] (typeApp (typeCtor "Record") [ typeApp (typeCtor (tad.name.text <> "R")) [ typeRowEmpty]])
+        ]
+    in { es: [], ps }
   Just tpe -> { es: [], ps: codegen >>= const (tell [ declType tad.name.text [] tpe ]) }
   Nothing -> { es: [], ps: codegen }
 
@@ -219,7 +231,7 @@ parseModuleBlock mn codegen mb = do
   let
     statements = mb.statements
   foldGeneratedCode parseNode mn codegen statements
-
+  
 parseModuleDeclaration :: ∀ e m. Partial => Monad m => ModuleName -> CodegenT e m Unit -> TS.ModuleDeclaration -> GeneratedCode e m
 parseModuleDeclaration mn codegen md = do
   let
