@@ -4,7 +4,13 @@ const ts = require('typescript')
 
 exports.createProgram = (fileNames) => () => ts.createProgram(fileNames, { allowJs: true })
 
-exports.createSourceFile = (fileName) => (sourceText) => () => ts.createSourceFile(fileName, sourceText, ts.ScriptTarget.ESNext, false, ts.ScriptKind.JS)
+exports.getTypeChecker = (program) => () => program.getTypeChecker()
+
+exports.getTypeAtLocation = (typeChecker) => (node) => typeChecker.getTypeAtLocation(node)
+
+exports.typeToString = (typeChecker) => (node) => (type) => typeChecker.typeToString(type, node)
+
+exports.createSourceFile = (fileName) => (sourceText) => ts.createSourceFile(fileName, sourceText, ts.ScriptTarget.ESNext, false, ts.ScriptKind.JS)
 
 exports.getSourceFile = (program) => (fileName) => () =>
     program.getSourceFile(fileName)
