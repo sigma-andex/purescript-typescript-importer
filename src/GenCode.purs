@@ -14,22 +14,35 @@ module GenCode
   ) where
 
 import Prelude
+import Prim hiding (Row, Type)
 
 import Control.Monad.Writer (tell)
+import Data.Argonaut (stringify)
 import Data.Array (foldl, length, singleton)
+import Data.Array as Array
+import Data.Array.NonEmpty.Internal (NonEmptyArray(..))
 import Data.Foldable (intercalate, null)
 import Data.Maybe (Maybe(..), isJust, maybe)
+import Data.Newtype (unwrap)
 import Data.Nullable (Nullable, toMaybe)
 import Data.Nullable as Nullable
 import Data.String (trim)
 import Data.String.Extra as SE
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
+import Data.Tuple.Nested ((/\))
 import Data.Unfoldable as Unfoldable
 import Debug (spy)
 import Effect (Effect)
+import Effect.Aff as Aff
+import Effect.Unsafe (unsafePerformEffect)
 import FFI.ESTree as ES
+import Node.Encoding (Encoding(..))
+import Node.FS.Aff as AFS
+import Node.FS.Aff as FS
 import Partial.Unsafe (unsafePartial)
+import Prim as P
+import PureScript.CST.Traversal as Traversal
 import PureScript.CST.Types as CST
 import Tidy.Codegen (binderVar, declForeign, declSignature, declType, declValue, exprApp, exprIdent, printModule, typeApp, typeArrow, typeCtor, typeRecord, typeRow, typeRowEmpty, typeVar)
 import Tidy.Codegen.Monad (CodegenT, codegenModule, importFrom, importType, importValue)
@@ -64,6 +77,48 @@ mkTypeScriptName { nodeModule, namespaces } name =
 
 mkNullable :: forall e. Partial => CST.Type e -> CST.Type e
 mkNullable t = typeApp (typeCtor "Nullable") [ t ]
+
+
+-- type OnType (t :: (P.Type -> P.Type) -> P.Type) r = (onType :: t CST.Type | r)
+
+-- typeVariables1 :: forall e. CST.Type e -> (CST.Type e) -- Identity Array
+-- typeVariables1 t =
+--   let
+--     v :: forall e. {| OnType (Traversal.PureRewrite e) () }
+--     v =
+--       let
+--         onType typ = case typ of
+--           CST.TypeVar (CST.Name {token, name}) -> (typeVar $ (unwrap name <> "test")) 
+--           x -> x
+--       in
+--         { onType }
+--   in Traversal.traverseType v t -- OnType from CST
+
+typeVariables :: forall e. CST.Type e -> Array (CST.Name CST.Ident)
+typeVariables = case _ of 
+  (CST.TypeVar n) -> [n]
+  (CST.TypeConstructor qn) -> []
+  (CST.TypeWildcard st) -> []
+  (CST.TypeHole id) -> []
+  (CST.TypeString st s) -> []
+  (CST.TypeRow row) -> typeRowVariables $ (unwrap row).value  -- ( s)
+  (CST.TypeRecord record) -> typeRowVariables $ (unwrap record).value -- { name :: }
+  (CST.TypeForall st1 bindings st2 t) -> [] 
+  (CST.TypeKinded t1 st t2) -> []
+  (CST.TypeApp t1 t2) -> []
+  (CST.TypeOp t1 ops) -> []
+  (CST.TypeOpName op) -> []
+  (CST.TypeArrow t1 st t2 ) -> []
+  (CST.TypeArrowName st) -> []
+  (CST.TypeConstrained t1 st t2) -> []
+  (CST.TypeParens t) -> []
+  (CST.TypeUnaryRow st t) -> []
+  (CST.TypeError e) -> []
+  
+typeRowVariables :: forall e. CST.Row e -> Array (CST.Name CST.Ident)
+typeRowVariables (CST.Row { labels: Just (CST.Separated { head: CST.Labeled { label, value }, tail: separatedTail }), tail }) = 
+   Array.foldl (\acc (_ /\ CST.Labeled { value: elem } ) -> acc <> (typeVariables elem) ) (typeVariables value) separatedTail
+typeRowVariables _ = []
 
 parseTypeNode :: ∀ n e. Partial => { | TS.TypeNodeR + n } -> Maybe (CST.Type e)
 parseTypeNode n@{ kind } =
@@ -124,9 +179,12 @@ parseContravariantTypeNode typeChecker n@{ kind } =
     parseTypeReference tn = TS.isTypeReferenceNode tn <#> \ref -> 
       let
         tsType = TS.getTypeAtLocation typeChecker ref
-        aliasSymbol = tsType # (_.aliasSymbol) # Nullable.toMaybe # isJust
-        symbol = tsType # (_.symbol) # Nullable.toMaybe # isJust
-        tpe = ref.type
+        aliasSymbol = tsType # (_.aliasSymbol) # Nullable.toMaybe
+        symbol = tsType # (_.symbol) # Nullable.toMaybe
+        parsedType = tsType # TS.typeToTypeNode typeChecker # Nullable.toMaybe >>= parseTypeNode
+        _ = spy "vars" $ parsedType
+        -- traverse over the typescript types to figure out how many type variables we need
+        --_ = spy "tpe" $ aliasSymbol >>= (\e -> parseTypeNode e) <#> typeVariables 
         -- _ = spy "tpe" $ 
         --   let 
         --     tsType = TS.getTypeAtLocation typeChecker ref
@@ -135,7 +193,7 @@ parseContravariantTypeNode typeChecker n@{ kind } =
         --     symbol = tsType # (_.symbol) # Nullable.toMaybe # isJust
         --   in  { aliasSymbol, symbol, name}
       in
-        if symbol || aliasSymbol then
+        if isJust symbol || isJust aliasSymbol then
           -- parseRecursively dereferenced type 
           -- add all type variables to the front 
           -- type Person r1 r2 r3 = ...

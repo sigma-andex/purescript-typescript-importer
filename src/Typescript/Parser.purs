@@ -46,6 +46,7 @@ module Typescript.Parser
   , isTypeReferenceNode
   , isVariableStatement
   , typeToString
+  , typeToTypeNode
   )
   where
 
@@ -71,6 +72,8 @@ foreign import createSourceFile :: String -> String -> Effect SourceFile
 foreign import getTypeChecker :: Program -> Effect TypeChecker
 
 foreign import getTypeAtLocation :: forall r. TypeChecker -> {|r} -> TsType
+
+foreign import typeToTypeNode :: TypeChecker -> TsType -> Nullable TypeNode
 
 foreign import typeToString :: forall r. TypeChecker -> {|r} -> TsType -> String
 
@@ -129,7 +132,7 @@ isModuleBlock = isModuleBlockImpl >>> toMaybe
 type Identifier
   = { text :: String }
 
-type TsType = { aliasSymbol :: Nullable Node, symbol :: Nullable SymbolObject }
+type TsType = { flags :: Int, aliasSymbol :: Nullable Node, symbol :: Nullable SymbolObject }
 foreign import data SymbolObject :: Type
 
 type NodeR r = (kind :: SK.SyntaxKindEnum | r)

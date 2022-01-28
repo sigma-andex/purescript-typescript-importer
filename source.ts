@@ -16,7 +16,8 @@ namespace person {
     type Age = number 
     type Street = string
     type XS = string[]
-    export function getName(p: Person, b: Age, c: Street, d: PersonC,e:PersonI, f: XS): number { return p.age }
+    
+    export function getName(p: Person, b: Age, c: Street, d: PersonC, e: PersonI, f: XS): number { return p.age }
     // getName :: forall r. Map String (PersonR r)) -> .... -> Number
     
 }
