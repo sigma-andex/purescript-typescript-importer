@@ -11,31 +11,49 @@ module GenCode
   , parseTypeAliasDeclaration
   , parseVariableDeclaration
   , parseVariableStatement
-  ) where
+  )
+  where
 
 import Prelude
+import Prim hiding (Row, Type)
 
 import Control.Monad.Writer (tell)
+import Data.Argonaut (stringify)
 import Data.Array (foldl, length, singleton)
+import Data.Array as Array
+import Data.Array.NonEmpty.Internal (NonEmptyArray(..))
 import Data.Foldable (intercalate, null)
 import Data.Maybe (Maybe(..), isJust, maybe)
-import Data.Nullable (toMaybe)
+import Data.Newtype (unwrap)
+import Data.Nullable (Nullable, toMaybe)
 import Data.Nullable as Nullable
 import Data.String (trim)
 import Data.String.Extra as SE
-import Data.Traversable (traverse)
-import Data.Tuple (Tuple(..))
+import Data.Traversable (class Traversable, traverse)
+import Data.Tuple (Tuple(..), snd)
+import Data.Tuple.Nested ((/\))
 import Data.Unfoldable as Unfoldable
+import Debug (spy)
 import Effect (Effect)
+import Effect.Aff as Aff
+import Effect.Unsafe (unsafePerformEffect)
 import FFI.ESTree as ES
+import Node.Encoding (Encoding(..))
+import Node.FS.Aff as AFS
+import Node.FS.Aff as FS
 import Partial.Unsafe (unsafePartial)
+import Prim as P
+import PureScript.CST.Traversal as Traversal
 import PureScript.CST.Types as CST
-import Tidy.Codegen (binderVar, declForeign, declSignature, declType, declValue, exprApp, exprIdent, printModule, typeApp, typeArrow, typeCtor, typeRecord)
+import Tidy.Codegen (binderVar, declForeign, declSignature, declType, declValue, exprApp, exprIdent, printModule, typeApp, typeArrow, typeCtor, typeRecord, typeRow, typeRowEmpty, typeVar)
 import Tidy.Codegen.Monad (CodegenT, codegenModule, importFrom, importType, importValue)
 import Type.Row (type (+))
+import Typescript.Parser (TypeChecker)
 import Typescript.Parser as TS
 import Typescript.SyntaxKind as SK
 import Typescript.Utils.Enum (default', on')
+import Unsafe.Coerce (unsafeCoerce)
+import CodeTraversals as CodeTraversals
 
 constJust :: forall a b. a -> b -> Maybe a
 constJust = Just >>> const
@@ -62,6 +80,31 @@ mkTypeScriptName { nodeModule, namespaces } name =
 mkNullable :: forall e. Partial => CST.Type e -> CST.Type e
 mkNullable t = typeApp (typeCtor "Nullable") [ t ]
 
+
+-- type OnType (t :: (P.Type -> P.Type) -> P.Type) r = (onType :: t CST.Type | r)
+
+-- typeVariables1 :: forall e. CST.Type e -> (CST.Type e) -- Identity Array
+-- typeVariables1 t =
+--   let
+--     v :: forall e. {| OnType (Traversal.PureRewrite e) () }
+--     v =
+--       let
+--         onType typ = case typ of
+--           CST.TypeVar (CST.Name {token, name}) -> (typeVar $ (unwrap name <> "test")) 
+--           x -> x
+--       in
+--         { onType }
+--   in Traversal.traverseType v t -- OnType from CST
+
+
+{-
+
+newtype Row e = Row
+  { labels :: Maybe (Separated (Labeled (Name Label) (Type e)))
+  , tail :: Maybe (Tuple SourceToken (Type e))
+  }
+
+-}
 parseTypeNode :: ∀ n e. Partial => { | TS.TypeNodeR + n } -> Maybe (CST.Type e)
 parseTypeNode n@{ kind } =
   let
@@ -76,13 +119,67 @@ parseTypeNode n@{ kind } =
       Just $ Tuple name if isNullable then mkNullable tl else tl
 
     parseTypeLiteralNode :: { | TS.TypeNodeR + n } -> Maybe (CST.Type e)
-    parseTypeLiteralNode tn = TS.isTypeLiteralNode tn <#> \tln -> typeRecord (toMembers tln.members) Nothing
+    parseTypeLiteralNode tn = TS.isTypeLiteralNode tn <#> \tln ->
+      typeRow (toMembers tln.members) (Just (typeVar "r"))
       where
       toMembers :: Array TS.TypeNode -> Array (Tuple String (CST.Type e))
       toMembers tnInner = tnInner <#> parseMember >>= Unfoldable.fromMaybe
 
     parseTypeReference :: { | TS.TypeNodeR + n } -> Maybe (CST.Type e)
     parseTypeReference tn = TS.isTypeReferenceNode tn <#> \ref -> typeCtor ref.typeName.text
+
+    caseFn :: SK.SyntaxKindEnum -> Maybe (CST.Type e)
+    caseFn =
+      default' (Nothing :: Maybe (CST.Type e))
+        # on' SK.typeLiteral (const (parseTypeLiteralNode n))
+        # on' SK.typeReference (const (parseTypeReference n))
+        # on' SK.numberKeyword (constJust $ typeCtor "Number")
+        # on' SK.stringKeyword (constJust $ typeCtor "String")
+        # on' SK.booleanKeyword (constJust $ typeCtor "Boolean")
+  in
+    caseFn kind
+    
+--- functions arguments
+parseContravariantTypeNode :: ∀ n e. Partial => TypeChecker -> { | TS.TypeNodeR + n } -> Maybe (CST.Type e)
+parseContravariantTypeNode typeChecker n@{ kind } =
+  let
+    parseMember :: TS.TypeNode -> Maybe (Tuple String (CST.Type e))
+    parseMember memberNode = do
+      ps <- TS.isPropertySignature memberNode
+      let
+        name = ps.name.text
+        isNullable = isJust $ toMaybe ps.questionToken
+        tpe = ps."type" # toMaybe >>= parseTypeNode
+      tl <- tpe
+      Just $ Tuple name if isNullable then mkNullable tl else tl
+
+    parseTypeLiteralNode :: { | TS.TypeNodeR + n } -> Maybe (CST.Type e)
+    parseTypeLiteralNode tn = TS.isTypeLiteralNode tn <#> \tln ->
+      typeRow (toMembers tln.members) (Just (typeVar "r"))
+      where
+      toMembers :: Array TS.TypeNode -> Array (Tuple String (CST.Type e))
+      toMembers tnInner = tnInner <#> parseMember >>= Unfoldable.fromMaybe
+
+    parseTypeReference :: { | TS.TypeNodeR + n } -> Maybe (CST.Type e)
+    parseTypeReference tn = TS.isTypeReferenceNode tn <#> \ref -> 
+      let
+        tsType = TS.getTypeAtLocation typeChecker ref
+        aliasSymbol = tsType # (_.aliasSymbol) # Nullable.toMaybe
+        symbol = tsType # (_.symbol) # Nullable.toMaybe
+        parsedType = tsType # TS.typeToTypeNode typeChecker # Nullable.toMaybe >>= parseTypeNode
+        _ = spy "vars" $ parsedType
+        -- traverse over the typescript types to figure out how many type variables we need
+        _ = spy "type variables" $ parsedType <#> CodeTraversals.typeVariables
+       
+      in
+        if isJust symbol || isJust aliasSymbol then
+          -- parseRecursively dereferenced type 
+          -- add all type variables to the front 
+          -- type Person r1 r2 r3 = ...
+          -- forall r1 r2 r3 r4. { }
+          (typeApp (typeCtor "Record") [ typeApp (typeCtor (ref.typeName.text <> "R")) [ typeVar "r" ]])
+        else
+          typeCtor ref.typeName.text
 
     caseFn :: SK.SyntaxKindEnum -> Maybe (CST.Type e)
     caseFn =
@@ -112,6 +209,16 @@ foldGeneratedCode f mn codegen elems =
 
 parseTypeAliasDeclaration :: ∀ e m. Partial => Monad m => ModuleName -> CodegenT e m Unit -> TS.TypeAliasDeclaration -> GeneratedCode e m
 parseTypeAliasDeclaration moduleName codegen tad = case parseTypeNode tad."type" of
+  -- type Person = number 
+  Just tpe@(CST.TypeRow _) -> 
+    let 
+      ps = do 
+        codegen 
+        tell [
+          declType (tad.name.text <> "R") [ typeVar "r" ] tpe
+        , declType (tad.name.text) [ ] (typeApp (typeCtor "Record") [ typeApp (typeCtor (tad.name.text <> "R")) [ typeRowEmpty]])
+        ]
+    in { es: [], ps }
   Just tpe -> { es: [], ps: codegen >>= const (tell [ declType tad.name.text [] tpe ]) }
   Nothing -> { es: [], ps: codegen }
 
@@ -121,8 +228,8 @@ type Parameter e =
   , tpe :: CST.Type e
   }
 
-parseFunctionDeclaration :: ∀ e m. Partial => Monad m => ModuleName -> CodegenT e m Unit -> TS.FunctionDeclaration -> GeneratedCode e m
-parseFunctionDeclaration moduleName codegen fd =
+parseFunctionDeclaration :: ∀ e m. Partial => Monad m => TypeChecker -> ModuleName -> CodegenT e m Unit -> TS.FunctionDeclaration -> GeneratedCode e m
+parseFunctionDeclaration typeChecker moduleName codegen fd =
   let
     maybeFnInfo = do
       name <- toMaybe fd.name
@@ -131,7 +238,7 @@ parseFunctionDeclaration moduleName codegen fd =
 
         parseParam :: TS.ParameterDeclaration -> Maybe (Parameter e)
         parseParam { questionToken, "type": paramTpe, name } =
-          toMaybe paramTpe >>= parseTypeNode <#> { isNullable: isJust $ toMaybe questionToken, name: name.text, tpe: _ }
+          toMaybe paramTpe >>= (parseContravariantTypeNode typeChecker) <#> { isNullable: isJust $ toMaybe questionToken, name: name.text, tpe: _ }
 
         params :: Array (Maybe (Parameter e))
         params = fd.parameters <#> parseParam
@@ -214,25 +321,25 @@ parseVariableStatement mn codegen vs =
   in
     result
 
-parseModuleBlock :: ∀ e m. Partial => Monad m => ModuleName -> CodegenT e m Unit -> TS.ModuleBlock -> GeneratedCode e m
-parseModuleBlock mn codegen mb = do
+parseModuleBlock :: ∀ e m. Partial => Monad m => TypeChecker -> ModuleName -> CodegenT e m Unit -> TS.ModuleBlock -> GeneratedCode e m
+parseModuleBlock typeChecker mn codegen mb = do
   let
     statements = mb.statements
-  foldGeneratedCode parseNode mn codegen statements
-
-parseModuleDeclaration :: ∀ e m. Partial => Monad m => ModuleName -> CodegenT e m Unit -> TS.ModuleDeclaration -> GeneratedCode e m
-parseModuleDeclaration mn codegen md = do
+  foldGeneratedCode (parseNode typeChecker) mn codegen statements
+  
+parseModuleDeclaration :: ∀ e m. Partial => Monad m => TypeChecker -> ModuleName -> CodegenT e m Unit -> TS.ModuleDeclaration -> GeneratedCode e m
+parseModuleDeclaration typeChecker mn codegen md = do
   let
     moduleName = md.name
     maybeBody = Nullable.toMaybe md.body
   case maybeBody of
     Just body ->
       -- [TODO] merge if same nm/moduleName?
-      parseModuleBlock (pushNamespace mn moduleName.text) codegen body
+      parseModuleBlock typeChecker (pushNamespace mn moduleName.text) codegen body
     Nothing -> { es: [], ps: codegen }
 
-parseNode :: ∀ n e m. Partial => Monad m => ModuleName -> CodegenT e m Unit -> { | TS.NodeR + n } -> GeneratedCode e m
-parseNode moduleName codegen n@{ kind } =
+parseNode :: ∀ n e m. Partial => Monad m => TypeChecker -> ModuleName -> CodegenT e m Unit -> { | TS.NodeR + n } -> GeneratedCode e m
+parseNode typeChecker moduleName  codegen n@{ kind } =
   let
     empty = { es: [], ps: codegen }
 
@@ -250,9 +357,9 @@ parseNode moduleName codegen n@{ kind } =
     caseFn =
       default' empty
         # on' SK.typeAliasDeclaration (mkHandler TS.isTypeAliasDeclaration parseTypeAliasDeclaration)
-        # on' SK.functionDeclaration (mkHandler TS.isFunctionDeclaration parseFunctionDeclaration)
+        # on' SK.functionDeclaration (mkHandler TS.isFunctionDeclaration (parseFunctionDeclaration typeChecker))
         # on' SK.variableStatement (mkHandler TS.isVariableStatement parseVariableStatement)
-        # on' SK.moduleDeclaration (mkHandler TS.isModuleDeclaration parseModuleDeclaration)
+        # on' SK.moduleDeclaration (mkHandler TS.isModuleDeclaration (parseModuleDeclaration typeChecker))
   in
     caseFn kind
 
@@ -263,30 +370,31 @@ type CogenOutput = { psFileName :: String, psCode :: String, esFileName :: Strin
 genCode :: CodegenConfig -> Effect (Array CogenOutput)
 genCode { nodeModule, fileNames } = do
   program <- TS.createProgram fileNames
+  typeChecker <- TS.getTypeChecker program
   sourceFiles <- traverse (\fn -> TS.getSourceFile program fn <#> \sf -> Tuple fn sf) fileNames
+  let 
+    generateOne (Tuple fn sf) = unsafePartial $ do
+      let
+        moduleName = SE.pascalCase nodeModule
+
+        acc { es: esInput, ps: psInput } node =
+          let
+            { es: esOutput, ps: psOutput } = parseNode typeChecker { nodeModule, fileName: fn, namespaces: [] } psInput node
+          in
+            { es: esInput <> esOutput, ps: psOutput }
+
+        declarations = TS.getSourceFileChildren sf >>= TS.getChildren # foldl acc { es: [], ps: pure unit }
+
+        generatedPsModule = codegenModule moduleName declarations.ps
+        generatedJsModule = ES.mkProgram $
+          [ ES.parse "'use strict';"
+          , ES.parse $ "const " <> moduleName <> " = require('" <> nodeModule <> "')"
+          ] <> (declarations.es)
+
+        psFileName = moduleName <> ".purs"
+        esFileName = moduleName <> ".js"
+
+        psCode = printModule generatedPsModule
+        esCode = ES.generate generatedJsModule # trim # (_ <> "\n")
+      pure $ { psFileName, psCode, esFileName, esCode }
   traverse generateOne sourceFiles
-  where
-  generateOne (Tuple fn sf) = unsafePartial $ do
-    let
-      moduleName = SE.pascalCase nodeModule
-
-      acc { es: esInput, ps: psInput } node =
-        let
-          { es: esOutput, ps: psOutput } = parseNode { nodeModule, fileName: fn, namespaces: [] } psInput node
-        in
-          { es: esInput <> esOutput, ps: psOutput }
-
-      declarations = TS.getSourceFileChildren sf >>= TS.getChildren # foldl acc { es: [], ps: pure unit }
-
-      generatedPsModule = codegenModule moduleName declarations.ps
-      generatedJsModule = ES.mkProgram $
-        [ ES.parse "'use strict';"
-        , ES.parse $ "const " <> moduleName <> " = require('" <> nodeModule <> "')"
-        ] <> (declarations.es)
-
-      psFileName = moduleName <> ".purs"
-      esFileName = moduleName <> ".js"
-
-      psCode = printModule generatedPsModule
-      esCode = ES.generate generatedJsModule # trim # (_ <> "\n")
-    pure $ { psFileName, psCode, esFileName, esCode }

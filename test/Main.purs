@@ -16,13 +16,20 @@ import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions.Diff (Actual(..), GoldenFile(..), shouldBeGolden)
 import Test.Spec.Reporter.Spec (specReporter)
 import Test.Spec.Runner (runSpec)
+import Test.Spec.Discovery (discover)
+import Test.Spec.Reporter.Console (consoleReporter)
 
-main ∷ Effect Unit
+main ∷ Effect Unit 
 main =
   launchAff_ do
     folders ← readdir original
-    runSpec [ specReporter ] (testGolden folders)
-    pure unit
+    specs <- discover "\\..*Spec"
+    runSpec [ specReporter ] do
+      (testGolden folders)
+      specs
+    --runSpec [ specReporter ] specs
+    -- runSpec [ consoleReporter] specs
+    
 
 testGolden ∷ Array FilePath → Spec Unit
 testGolden dirs = do

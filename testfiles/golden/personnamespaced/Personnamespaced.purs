@@ -4,9 +4,10 @@ import Data.Function.Uncurried (Fn2, runFn2)
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toNullable)
 
-type Person = { name :: String, age :: Number }
+type PersonR r = (name :: String, age :: Number | r)
+type Person = Record (PersonR ())
 
-foreign import getAge :: Person -> Number
+foreign import getAge :: forall r. Record (PersonR r) -> Number
 foreign import createPersonImpl :: Fn2 String Number Person
 
 createPerson :: String -> Number -> Person
@@ -24,4 +25,5 @@ foreign import createPersonWithNameImpl :: Fn2 String (Nullable Number) Person
 createPersonWithName :: String -> Maybe Number -> Person
 createPersonWithName name age = runFn2 createPersonWithNameImpl name (toNullable age)
 
-type NullablePerson = { name :: Nullable String, age :: Nullable Number }
+type NullablePersonR r = (name :: Nullable String, age :: Nullable Number | r)
+type NullablePerson = Record (NullablePersonR ())

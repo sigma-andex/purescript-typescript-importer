@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/sigma-andex/purescript-typescript-importer#readme",
   "dependencies": {
+    "@types/node": "^17.0.10",
     "acorn": "^8.6.0",
     "astring": "^1.8.1",
     "diff2html": "^3.4.13",

@@ -1,25 +1,27 @@
 type Person = {
     name: string,
-    age: number
+    age: Age
 }
 
-export function getAge(person: Person): number { return person.age }
+type Age = number
 
-export function createPerson(name: string, age: number): Person {
+export function getAge(person: Person): Age { return person.age }
+
+export function createPerson(name: string, age: Age): Person {
     return { name, age }
 }
 
 export const johnDoe: Person = { name: "John Doe", age: 30 }
 
-export function createPersonOrDefault(name?: string, age?: number): Person {
+export function createPersonOrDefault(name?: string, age?: Age): Person {
     return { name: name ? name : "John", age: age ? age : 30 }
 }
 
-export function createPersonWithName(name: string, age?: number): Person {
+export function createPersonWithName(name: string, age?: Age): Person {
     return { name: name, age: age ? age : 30 }
 }
 
 type NullablePerson = {
     name?: string,
-    age?: number
+    age?: Age
 }

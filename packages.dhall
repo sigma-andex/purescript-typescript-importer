@@ -29,9 +29,9 @@ let upstream =
           , "unsafe-coerce"
           ]
       , repo =
-          "https://github.com/natefaubion/purescript-language-cst-parser.git"
+          "https://github.com/reactormonk/purescript-language-cst-parser.git"
       , version =
-          "v0.9.3"
+          "b5e42a89b68cb42c1fce68d7165226879cb1951c"
           }
     with tidy = { dependencies =
           [ "arrays"

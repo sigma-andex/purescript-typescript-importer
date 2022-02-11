@@ -16,7 +16,10 @@ module Typescript.Parser
   , PropertySignature
   , SourceFile
   , Statement
+  , SymbolObject
+  , TsType
   , TypeAliasDeclaration
+  , TypeChecker
   , TypeElement
   , TypeLiteralNode
   , TypeNode
@@ -32,6 +35,8 @@ module Typescript.Parser
   , getSourceFileChildren
   , getSourceFileName
   , getSourceFiles
+  , getTypeAtLocation
+  , getTypeChecker
   , isFunctionDeclaration
   , isModuleBlock
   , isModuleDeclaration
@@ -40,7 +45,10 @@ module Typescript.Parser
   , isTypeLiteralNode
   , isTypeReferenceNode
   , isVariableStatement
-  ) where
+  , typeToString
+  , typeToTypeNode
+  )
+  where
 
 import Prelude
 
@@ -55,9 +63,19 @@ foreign import data SourceFile :: Type
 
 foreign import data Program :: Type
 
+foreign import data TypeChecker :: Type
+
 foreign import createProgram :: Array String -> Effect Program
 
 foreign import createSourceFile :: String -> String -> Effect SourceFile
+
+foreign import getTypeChecker :: Program -> Effect TypeChecker
+
+foreign import getTypeAtLocation :: forall r. TypeChecker -> {|r} -> TsType
+
+foreign import typeToTypeNode :: TypeChecker -> TsType -> Nullable TypeNode
+
+foreign import typeToString :: forall r. TypeChecker -> {|r} -> TsType -> String
 
 foreign import getSourceFile :: Program -> String -> Effect SourceFile
 
@@ -113,6 +131,9 @@ isModuleBlock = isModuleBlockImpl >>> toMaybe
 
 type Identifier
   = { text :: String }
+
+type TsType = { flags :: Int, aliasSymbol :: Nullable Node, symbol :: Nullable SymbolObject }
+foreign import data SymbolObject :: Type
 
 type NodeR r = (kind :: SK.SyntaxKindEnum | r)
 
@@ -174,6 +195,7 @@ type EntityName = Identifier
 type TypeReferenceNode =
   { kind :: SK.SyntaxKind SK.TypeReference
   , typeName :: EntityName
+  , type :: Nullable TypeNode
   }
 
 type VariableDeclaration =
