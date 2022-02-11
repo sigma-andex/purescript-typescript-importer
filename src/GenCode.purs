@@ -11,7 +11,8 @@ module GenCode
   , parseTypeAliasDeclaration
   , parseVariableDeclaration
   , parseVariableStatement
-  ) where
+  )
+  where
 
 import Prelude
 import Prim hiding (Row, Type)
@@ -28,8 +29,8 @@ import Data.Nullable (Nullable, toMaybe)
 import Data.Nullable as Nullable
 import Data.String (trim)
 import Data.String.Extra as SE
-import Data.Traversable (traverse)
-import Data.Tuple (Tuple(..))
+import Data.Traversable (class Traversable, traverse)
+import Data.Tuple (Tuple(..), snd)
 import Data.Tuple.Nested ((/\))
 import Data.Unfoldable as Unfoldable
 import Debug (spy)
@@ -52,6 +53,7 @@ import Typescript.Parser as TS
 import Typescript.SyntaxKind as SK
 import Typescript.Utils.Enum (default', on')
 import Unsafe.Coerce (unsafeCoerce)
+import CodeTraversals as CodeTraversals
 
 constJust :: forall a b. a -> b -> Maybe a
 constJust = Just >>> const
@@ -94,32 +96,15 @@ mkNullable t = typeApp (typeCtor "Nullable") [ t ]
 --         { onType }
 --   in Traversal.traverseType v t -- OnType from CST
 
-typeVariables :: forall e. CST.Type e -> Array (CST.Name CST.Ident)
-typeVariables = case _ of 
-  (CST.TypeVar n) -> [n]
-  (CST.TypeConstructor qn) -> []
-  (CST.TypeWildcard st) -> []
-  (CST.TypeHole id) -> []
-  (CST.TypeString st s) -> []
-  (CST.TypeRow row) -> typeRowVariables $ (unwrap row).value  -- ( s)
-  (CST.TypeRecord record) -> typeRowVariables $ (unwrap record).value -- { name :: }
-  (CST.TypeForall st1 bindings st2 t) -> [] 
-  (CST.TypeKinded t1 st t2) -> []
-  (CST.TypeApp t1 t2) -> []
-  (CST.TypeOp t1 ops) -> []
-  (CST.TypeOpName op) -> []
-  (CST.TypeArrow t1 st t2 ) -> []
-  (CST.TypeArrowName st) -> []
-  (CST.TypeConstrained t1 st t2) -> []
-  (CST.TypeParens t) -> []
-  (CST.TypeUnaryRow st t) -> []
-  (CST.TypeError e) -> []
-  
-typeRowVariables :: forall e. CST.Row e -> Array (CST.Name CST.Ident)
-typeRowVariables (CST.Row { labels: Just (CST.Separated { head: CST.Labeled { label, value }, tail: separatedTail }), tail }) = 
-   Array.foldl (\acc (_ /\ CST.Labeled { value: elem } ) -> acc <> (typeVariables elem) ) (typeVariables value) separatedTail
-typeRowVariables _ = []
 
+{-
+
+newtype Row e = Row
+  { labels :: Maybe (Separated (Labeled (Name Label) (Type e)))
+  , tail :: Maybe (Tuple SourceToken (Type e))
+  }
+
+-}
 parseTypeNode :: ∀ n e. Partial => { | TS.TypeNodeR + n } -> Maybe (CST.Type e)
 parseTypeNode n@{ kind } =
   let
@@ -184,14 +169,8 @@ parseContravariantTypeNode typeChecker n@{ kind } =
         parsedType = tsType # TS.typeToTypeNode typeChecker # Nullable.toMaybe >>= parseTypeNode
         _ = spy "vars" $ parsedType
         -- traverse over the typescript types to figure out how many type variables we need
-        --_ = spy "tpe" $ aliasSymbol >>= (\e -> parseTypeNode e) <#> typeVariables 
-        -- _ = spy "tpe" $ 
-        --   let 
-        --     tsType = TS.getTypeAtLocation typeChecker ref
-        --     name = ref.typeName.text
-        --     aliasSymbol = tsType # (_.aliasSymbol) # Nullable.toMaybe # isJust
-        --     symbol = tsType # (_.symbol) # Nullable.toMaybe # isJust
-        --   in  { aliasSymbol, symbol, name}
+        _ = spy "type variables" $ parsedType <#> CodeTraversals.typeVariables
+       
       in
         if isJust symbol || isJust aliasSymbol then
           -- parseRecursively dereferenced type 

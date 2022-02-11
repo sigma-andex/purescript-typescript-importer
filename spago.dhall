@@ -3,12 +3,14 @@
   [ "aff"
   , "argonaut"
   , "arrays"
+  , "barlow-lens"
   , "bifunctors"
   , "console"
   , "control"
   , "debug"
   , "effect"
   , "either"
+  , "exceptions"
   , "foldable-traversable"
   , "functions"
   , "language-cst-parser"
@@ -27,6 +29,7 @@
   , "psci-support"
   , "record"
   , "spec"
+  , "spec-discovery"
   , "strings"
   , "strings-extra"
   , "tidy-codegen"
@@ -38,10 +41,6 @@
   , "unsafe-coerce"
   , "untagged-union"
   , "uuid"
-  , "functions"
-  , "node-process"
-  , "ordered-collections"
-  , "record"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]
