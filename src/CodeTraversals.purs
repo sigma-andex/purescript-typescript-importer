@@ -12,11 +12,13 @@ import Data.Array.NonEmpty.Internal (NonEmptyArray(..))
 import Data.Bifunctor (rmap)
 import Data.Bitraversable (rtraverse)
 import Data.Foldable (intercalate, null)
+import Data.Lens (Optic)
 import Data.Lens.Traversal (traverseOf)
 import Data.Maybe (Maybe(..), isJust, maybe)
 import Data.Newtype (unwrap)
 import Data.Nullable (Nullable, toMaybe)
 import Data.Nullable as Nullable
+import Data.Profunctor.Star (Star)
 import Data.String (trim)
 import Data.String.Extra as SE
 import Data.Traversable (class Traversable, traverse)
@@ -34,7 +36,7 @@ import Node.FS.Aff as FS
 import Partial.Unsafe (unsafePartial)
 import Prim as P
 import PureScript.CST.Traversal as Traversal
-import PureScript.CST.Types (Wrapped)
+import PureScript.CST.Types (Labeled, SourceToken, Wrapped)
 import PureScript.CST.Types as CST
 import Tidy.Codegen (binderVar, declForeign, declSignature, declType, declValue, exprApp, exprIdent, printModule, typeApp, typeArrow, typeCtor, typeRecord, typeRow, typeRowEmpty, typeVar)
 import Tidy.Codegen.Monad (CodegenT, codegenModule, importFrom, importType, importValue)
@@ -78,22 +80,19 @@ writeTypeVariables fun typ = case typ of
       pure $ typeVar ident
   (CST.TypeRow tr) ->
     CST.TypeRow <$> traverseOf (barlow (key :: _ "!.value")) (writeTypeRowTypeVariables fun) tr
-    -- let
-    --   newState = writeTypeRowTypeVariables (Barlow.view (key :: _ "!.value") tr) state fun
-    --   result = rmap (\newValue -> CST.TypeRow $ Barlow.set (key :: _ "!.value") newValue tr) newState
-    -- in
-    --   result
   otherwise -> pure otherwise
+  
+type S e = Array (Tuple CST.SourceToken (CST.Labeled (CST.Name CST.Label) (CST.Type e)))
 
 writeTypeRowTypeVariables :: forall m e. Monad m => (CST.Ident -> m CST.Ident) -> CST.Row e -> m (CST.Row e)
 writeTypeRowTypeVariables fun (CST.Row { labels: Just (CST.Separated { head: CST.Labeled { label, value, separator }, tail: separatedTail }), tail }) = 
-    -- Tuple state $ typeRow [] Nothing
-    -- let
-      -- Tuple newState1 newIdent = writeTypeVariables value state fun
-      -- Tuple newState2 newSeparatedTail = foldl (\(Tuple ns nt) t -> nt <> [writeTypeVariables t ns fun]) newState1 separatedTail
-      -- Tuple newState3 newTail = foldl (\(Tuple ns nt) t -> nt <> [writeTypeVariables t state fun]) newState2 tail
-    -- in
-      pure (CST.Row { labels: Just (CST.Separated { head: CST.Labeled { label, value: value, separator }, tail: separatedTail }), tail })
+  do
+    newValue <- writeTypeVariables fun value
+    -- Array (Tuple CST.SourceToken (CST.Labeled (CST.Name CST.Label) (CST.Type e)))
+    -- traverseOf :: ∀ f s t a b. Optic (Star f) s t a b → (a → f b) → s → f t
+    newSeparatedTail <- traverseOf (barlow (key :: _ "+%2!.value") :: Optic (Star m) (S e) (S e) (CST.Type e) (CST.Type e)) (writeTypeVariables fun) separatedTail
+    newTail <- traverseOf (barlow (key :: _ "?%1")) (writeTypeVariables fun) tail
+    pure (CST.Row { labels: Just (CST.Separated { head: CST.Labeled { label, value: newValue, separator }, tail: newSeparatedTail }), tail: newTail })
   -- let 
   --   _ = spy "r" r 
   -- in Array.foldl (\acc (_ /\ CST.Labeled { value: elem } ) -> acc <> (typeVariables elem) ) (typeVariables value) separatedTail <> 
